@@ -2,7 +2,6 @@
 numpy
 pandas
 scikit-learn
-dotenv
 
 # ---- Gradient boosting (fast baseline) ----
 xgboost
@@ -16,7 +15,6 @@ tensorflow[and-cuda]
 
 # ---- MLOps & experiment tracking ----
 mlflow
-dagshub
 
 # ---- Hyperparameter tuning ----
 optuna
