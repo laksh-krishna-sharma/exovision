@@ -1,0 +1,50 @@
+# ---- Core data science ----
+numpy
+pandas
+scikit-learn
+
+# ---- Gradient boosting (fast baseline) ----
+xgboost
+shap
+
+# ---- Deep learning (ANN) ----
+tensorflow[and-cuda]
+
+# Optional: use PyTorch instead/in addition to TF
+# torch
+
+# ---- MLOps & experiment tracking ----
+mlflow
+
+# ---- Hyperparameter tuning ----
+optuna
+
+# ---- Explainability ----
+shap
+
+# ---- Utilities ----
+joblib
+matplotlib
+seaborn
+requests
+
+# ---- FastAPI backend ----
+fastapi
+uvicorn[standard]
+python-multipart
+aiofiles
+
+# ---- Optional / interoperability ----
+onnxruntime
+
+# ---- Notebooks & dev ----
+jupyterlab
+ipykernel
+notebook
+jupyter
+
+protobuf  # For TensorFlow compatibility
+scipy             # For statistical functions
+plotly          # For interactive plots (optional)
+kaleido
+optuna-integration[mlflow]
