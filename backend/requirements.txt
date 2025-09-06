@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+passlib[bcrypt]
+sqlalchemy
+pydantic_settings
+pydantic
+asyncpg
+pydantic[email]
+PyJWT
+httpx
+sqlmodel
+python-multipart
+gunicorn
