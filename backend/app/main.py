@@ -1,7 +1,6 @@
 import time
 from typing import Any, Callable, TypeVar, Dict, AsyncGenerator
 from contextlib import asynccontextmanager
-import uvicorn
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from config import settings
