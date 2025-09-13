@@ -1,12 +1,19 @@
 // src/store/slices/signupSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
+interface User {
+  id?: string;
+  name?: string;
+  email?: string;
+  // Add other fields as needed
+}
+
 interface SignupState {
-  user: any | null;
+  user: User | null;
   loading: boolean;
   error: string | null;
 }
@@ -32,10 +39,10 @@ export const signup = createAsyncThunk(
         { headers: { 'Content-Type': 'application/json' } }
       );
       return response.data;
-    } catch (err: any) {
-      console.error("Signup error:", err.response?.data);
+    } catch (err: unknown) {
+      console.error("Signup error:", (err as AxiosError)?.response?.data);
       console.error("Full error:", err);
-      return rejectWithValue(err.response?.data || err.message);
+      return rejectWithValue((err as AxiosError)?.response?.data || (err as Error).message);
     }
   }
 );
@@ -57,7 +64,7 @@ const signupSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(signup.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(signup.fulfilled, (state, action: PayloadAction<User>) => {
         state.loading = false;
         state.user = action.payload;
         localStorage.setItem('user', JSON.stringify(action.payload));

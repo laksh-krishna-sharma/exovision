@@ -1,13 +1,13 @@
 // src/store/slices/authSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 // Define the type for auth state
 interface AuthState {
-  user: any | null;
+  user: string[] | null;
   access_token: string | null;
   loading: boolean;
   error: string | null;
@@ -40,8 +40,10 @@ export const login = createAsyncThunk(
       );
 
       return response.data; // { access_token, token_type }
-    } catch (err: any) {
-      return rejectWithValue(err.response?.data?.detail || err.message);
+    } catch (err: unknown) {
+      const errorData = (err as AxiosError)?.response?.data;
+      const errorDetail = errorData && typeof errorData === 'object' && 'detail' in errorData ? (errorData as { detail?: string }).detail : undefined;
+      return rejectWithValue(errorDetail || (err as Error).message);
     }
   }
 );
@@ -64,7 +66,7 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<{ access_token: string }>) => {
         state.loading = false;
         state.access_token = action.payload.access_token;
         localStorage.setItem('token', action.payload.access_token);
