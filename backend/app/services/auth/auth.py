@@ -2,8 +2,8 @@ from typing import Optional
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from models.user import User
-from utilities.jwt import hash_password, verify_password
+from app.models.user import User
+from app.utilities.jwt import hash_password, verify_password
 
 
 # Signup logic
