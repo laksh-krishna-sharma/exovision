@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from models.user import User
 from utilities.jwt import hash_password, verify_password
+from datetime import datetime
 
 
 # Signup logic
@@ -17,7 +18,13 @@ async def signup_user(db: AsyncSession, name: str, email: str, password: str) ->
             detail="Email already registered",
         )
     hashed_pw = hash_password(password)
-    new_user = User(name=name, email=email, hashed_password=hashed_pw)
+    new_user = User(
+        name=name,
+        email=email,
+        hashed_password=hashed_pw,
+        created_at=datetime.utcnow(),  # Use naive UTC datetime
+        updated_at=datetime.utcnow()   # If applicable
+    )
     db.add(new_user)
     await db.commit()
     await db.refresh(new_user)

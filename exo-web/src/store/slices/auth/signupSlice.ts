@@ -34,7 +34,8 @@ export const signup = createAsyncThunk(
       return response.data;
     } catch (err: any) {
       console.error("Signup error:", err.response?.data);
-      return rejectWithValue(err.response?.data?.detail || err.message);
+      console.error("Full error:", err);
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
