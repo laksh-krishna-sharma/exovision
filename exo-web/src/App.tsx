@@ -1,15 +1,17 @@
 
-import { Button } from "@/components/ui/button"
+import { Routes, Route } from "react-router-dom"
+import LandingPage from "@/pages/LandingPage"
+import LoginPage from "@/pages/LoginPage"
+import SignupPage from "@/pages/SignupPage"
+
 function App() {
   
-
   return (
-    <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <div className="flex min-h-svh flex-col items-center justify-center">
-      <Button>Click me</Button>
-      </div>
-    </>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+      </Routes>
   )
 }
 
