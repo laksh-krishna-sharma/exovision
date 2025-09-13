@@ -2,27 +2,30 @@ from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from .schema.auth import SignupRequest
 from typing import Dict, Any
 
-from utilities.db import get_db
-from services.auth.auth import (
+from app.utilities.db import get_db
+from app.services.auth.auth import (
     signup_user,
     authenticate_user,
 )
-from utilities.jwt import create_access_token
-from config import settings
-from utilities.logger import logger as get_logger
+from app.utilities.jwt import create_access_token
+from app.config import settings
+from app.utilities.logger import logger as get_logger
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 log = get_logger(__name__)
 
 
+# Update the signup function
 @router.post("/signup")
 async def signup(
-    name: str, email: str, password: str, db: AsyncSession = Depends(get_db)
+    request: SignupRequest,  # Use the model instead of individual params
+    db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
-    user = await signup_user(db, name, email, password)
+    user = await signup_user(db, request.name, request.email, request.password)
     return {"id": user.id, "name": user.name, "email": user.email}
 
 
