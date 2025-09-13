@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useAppDispatch , useAppSelector} from "@/store/index"
+import { useAppDispatch } from "@/store/index"
 import { login } from "@/store/slices/auth/loginSlice"
 
 const LoginPage = () => {

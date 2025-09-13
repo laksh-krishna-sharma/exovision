@@ -6,7 +6,7 @@ import { logout } from "@/store/slices/auth/loginSlice"
 const LandingPage = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { user, access_token } = useAppSelector((state) => state.loginData)
+  const { access_token } = useAppSelector((state) => state.loginData)
   const isAuthenticated = !!access_token
 
   return (
@@ -18,7 +18,7 @@ const LandingPage = () => {
 
       {isAuthenticated ? (
         <div className="flex flex-col items-center gap-3">
-          <p className="text-lg">Hello, <span className="font-medium">{user?.name || user?.email}</span> 👋</p>
+          {/* <p className="text-lg">Hello, <span className="font-medium">{user?.username || user?.email}</span> 👋</p> */}
           <div className="flex gap-3">
             <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
             <Button variant="destructive" onClick={() => dispatch(logout())}>
