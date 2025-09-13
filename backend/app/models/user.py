@@ -1,5 +1,5 @@
 from typing import Optional
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlmodel import SQLModel, Field
 
@@ -11,8 +11,8 @@ class User(SQLModel, table=True):
     email: str = Field(index=True, unique=True, nullable=False)
     hashed_password: str = Field(nullable=False)
     created_at: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc), nullable=False
+        default_factory=datetime.now, nullable=False
     )
-    updated_at: Optional[datetime] = Field(
-        default=None, sa_column_kwargs={"onupdate": lambda: datetime.now(timezone.utc)}
+    updated_at: datetime = Field(
+        default_factory=datetime.now, nullable=False
     )
