@@ -75,7 +75,7 @@ const SignupPage = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
-            placeholder="Password"
+            placeholder="Create password"
             className="bg-white/5 text-white placeholder-white/50 border border-white/20"
           />
           <Input
