@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+
+
 # Add this model for the request body
 class SignupRequest(BaseModel):
     name: str

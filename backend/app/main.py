@@ -21,15 +21,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     log.info("Starting ExoVision API...")
     await init_models()
-    
+
     # Preload the prediction model
     try:
         from app.services.prediction import prediction_service
+
         prediction_service.load_model()
         log.info("Prediction model loaded successfully during startup")
     except Exception as e:
         log.error(f"Failed to load prediction model during startup: {e}")
-    
+
     log.info("Startup complete.")
 
     yield

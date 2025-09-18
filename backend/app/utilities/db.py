@@ -15,8 +15,8 @@ from app.config import settings
 from app.utilities.logger import logger
 
 # Import models so SQLModel can create tables
-from app.models.user import User
-from app.models.prediction import PredictionRecord
+# from app.models.user import User
+# from app.models.prediction import PredictionRecord
 
 log = logger(__name__)
 
