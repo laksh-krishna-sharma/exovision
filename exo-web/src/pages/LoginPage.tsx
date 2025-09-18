@@ -18,7 +18,7 @@ const LoginPage = () => {
       return alert("Please enter email and password");
     }
     dispatch(login({ email, password }));
-    navigate("/");
+    navigate("/home"); // Redirect to Home.tsx
   };
 
   return (
