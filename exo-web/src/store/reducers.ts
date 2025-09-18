@@ -5,6 +5,10 @@ import storage from "redux-persist/lib/storage"; // defaults to localStorage for
 import {
     loginData,
     signupData,
+    keplerPredictionData,
+    keplerGetPredictionData,
+    getPredictByIdData,
+    deletePredictByIdData,
  } from "./coreReducer";
 
 const persistConfig = {
@@ -16,6 +20,10 @@ const persistConfig = {
 const rootReducer = combineReducers({
     loginData,
     signupData,
+    keplerPredictionData,
+    keplerGetPredictionData,
+    getPredictByIdData,
+    deletePredictByIdData,
 });
 
 const persistedReducer = persistReducer<ReturnType<typeof rootReducer>, AnyAction>(
