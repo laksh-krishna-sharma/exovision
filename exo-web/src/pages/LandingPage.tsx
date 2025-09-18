@@ -19,12 +19,9 @@ const LandingPage = () => {
 
       {/* Overlay Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen gap-6 p-6 pointer-events-none">
-        <h1 className="text-4xl font-bold text-white pointer-events-auto">
+        <h1 className="text-4xl font-bold text-white md:text-6xl pointer-events-auto">
           Exovision
         </h1>
-        <p className="text-gray-200 max-w-xl text-center pointer-events-auto">
-          Landing page for Exovision. Please login or sign up to continue.
-        </p>
 
         {isAuthenticated ? (
           <div className="flex flex-col items-center gap-3 pointer-events-auto">
@@ -37,9 +34,12 @@ const LandingPage = () => {
           </div>
         ) : (
           <div className="flex gap-3 pointer-events-auto">
-            <Button onClick={() => navigate("/login")}>Login</Button>
-            <Button variant="outline" onClick={() => navigate("/signup")}>
-              Sign up
+            <Button
+              onClick={() => navigate("/login")}
+              className="bg-white/10 text-white hover:bg-white/20 border border-white/20 
+                         hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
+            >
+              Start now
             </Button>
           </div>
         )}
