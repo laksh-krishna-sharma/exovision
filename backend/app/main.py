@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.utilities.logger import logger
 from app.routes.auth.auth import router as auth_router
+from app.routes.prediction.prediction import router as prediction_router
 from app.utilities.db import init_models, async_session
 
 description = """
@@ -20,6 +21,16 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     log.info("Starting ExoVision API...")
     await init_models()
+
+    # Preload the prediction model
+    try:
+        from app.services.prediction import prediction_service
+
+        prediction_service.load_model()
+        log.info("Prediction model loaded successfully during startup")
+    except Exception as e:
+        log.error(f"Failed to load prediction model during startup: {e}")
+
     log.info("Startup complete.")
 
     yield
@@ -48,6 +59,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(prediction_router)
 
 
 @app.get("/", tags=["Health"])

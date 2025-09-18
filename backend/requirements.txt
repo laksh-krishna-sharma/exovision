@@ -13,3 +13,7 @@ pydantic[email]
 httpx
 sqlmodel
 gunicorn
+tensorflow
+numpy
+pandas
+types-requests

@@ -19,7 +19,7 @@ def _level_from_string(level_str: str) -> int:
     return getattr(logging, level_str.upper(), logging.INFO)
 
 
-def logger(name: str = "HearU") -> logging.Logger:
+def logger(name: str = "Exovision") -> logging.Logger:
     """
     Factory that returns a configured logger instance.
 

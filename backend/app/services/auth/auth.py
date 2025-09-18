@@ -23,7 +23,7 @@ async def signup_user(db: AsyncSession, name: str, email: str, password: str) ->
         email=email,
         hashed_password=hashed_pw,
         created_at=datetime.utcnow(),  # Use naive UTC datetime
-        updated_at=datetime.utcnow()   # If applicable
+        updated_at=datetime.utcnow(),  # If applicable
     )
     db.add(new_user)
     await db.commit()
