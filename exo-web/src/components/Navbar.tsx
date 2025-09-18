@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import type { AppDispatch } from '@/store';
 
 interface NavbarProps {
-  dispatch: (action: any) => void;
-  logout: () => any;
+  dispatch: AppDispatch;
+  logout: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ dispatch, logout }) => {
+const Navbar: React.FC<NavbarProps> = ({ logout }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -57,7 +58,7 @@ const Navbar: React.FC<NavbarProps> = ({ dispatch, logout }) => {
         {/* Right side - Logout button */}
         <Button 
           variant="destructive" 
-          onClick={() => dispatch(logout())}
+          onClick={logout}
           className="text-sm md:text-base px-3 py-1 md:px-4 md:py-2"
         >
           Logout
