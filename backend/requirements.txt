@@ -16,3 +16,4 @@ gunicorn
 tensorflow
 numpy
 pandas
+types-requests
