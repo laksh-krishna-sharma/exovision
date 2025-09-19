@@ -1,6 +1,9 @@
 import json
+import logging
 import multiprocessing
 import os
+
+from app.utilities.logger import ColoredFormatter, _level_from_string
 
 workers_per_core_str = os.getenv("WORKERS_PER_CORE", "1")
 max_workers_str = os.getenv("MAX_WORKERS", "10")
@@ -14,6 +17,45 @@ host = os.getenv("HOST", "0.0.0.0")
 port = os.getenv("PORT", "8000")
 bind_env = os.getenv("BIND", None)
 use_loglevel = os.getenv("LOG_LEVEL", "info")
+
+# Configure Gunicorn logger with colored output
+gunicorn_logger = logging.getLogger("gunicorn")
+if not gunicorn_logger.handlers:
+    lvl = _level_from_string(use_loglevel)
+    gunicorn_logger.setLevel(lvl)
+    handler = logging.StreamHandler()
+    handler.setLevel(lvl)
+    handler.setFormatter(
+        ColoredFormatter(
+            fmt="[GUNICORN] %(levelname)s %(asctime)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
+    gunicorn_logger.addHandler(handler)
+
+# Configure access and error loggers
+access_logger = logging.getLogger("gunicorn.access")
+if not access_logger.handlers:
+    access_logger.setLevel(logging.INFO)
+    access_handler = logging.StreamHandler()
+    access_handler.setFormatter(
+        ColoredFormatter(
+            fmt="[ACCESS] %(asctime)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        )
+    )
+    access_logger.addHandler(access_handler)
+
+error_logger = logging.getLogger("gunicorn.error")
+if not error_logger.handlers:
+    error_logger.setLevel(_level_from_string(use_loglevel))
+    error_handler = logging.StreamHandler()
+    error_handler.setFormatter(
+        ColoredFormatter(
+            fmt="[ERROR] %(levelname)s %(asctime)s - %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    )
+    error_logger.addHandler(error_handler)
 
 if bind_env:
     use_bind = bind_env
@@ -41,7 +83,7 @@ timeout_str = os.getenv("TIMEOUT", "60")
 keepalive_str = os.getenv("KEEP_ALIVE", "5")
 
 # Gunicorn config variables
-worker_class = "app.workers.ConfigurableWorker"
+worker_class = "uvicorn.workers.UvicornWorker"
 loglevel = use_loglevel
 workers = web_concurrency
 bind = use_bind
