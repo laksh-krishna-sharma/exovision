@@ -7,6 +7,7 @@ import pandas as pd
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from sqlalchemy import desc
+from app.models.user import User
 
 try:
     import tensorflow as tf
@@ -163,10 +164,20 @@ class PredictionService:
             # Generate unique prediction ID
             prediction_id = str(uuid.uuid4())
 
+            # Check if user exists (to enforce relationship integrity)
+            if user_id:
+                from sqlmodel import select
+
+                user_query = select(User).where(User.id == user_id)
+                user_result = await db.execute(user_query)
+                user = user_result.scalar_one_or_none()
+                if not user:
+                    raise ValueError(f"User with ID {user_id} does not exist")
+
             # Save prediction to database
             prediction_record = PredictionRecord(
                 prediction_id=prediction_id,
-                user_id=user_id,
+                user_id=user_id,  # Now consistently int
                 prediction=prediction,
                 confidence=confidence,
                 input_data=json.dumps(data.model_dump()),
@@ -203,7 +214,7 @@ class PredictionService:
             query = select(PredictionRecord)
 
             if user_id:
-                query = query.where(PredictionRecord.user_id == user_id)
+                query = query.where(PredictionRecord.user_id == user_id)  # Now int
 
             query = (
                 query.offset(skip)
@@ -238,7 +249,7 @@ class PredictionService:
             )
 
             if user_id:
-                query = query.where(PredictionRecord.user_id == user_id)
+                query = query.where(PredictionRecord.user_id == user_id)  # Now int
 
             result = await db.execute(query)
             prediction = result.scalar_one_or_none()
