@@ -7,6 +7,7 @@ from sqlmodel import SQLModel, Field as SQLField
 if TYPE_CHECKING:
     from app.models.user import User
 
+
 class PredictionRequest(BaseModel):
     """Model for exoplanet prediction request"""
 
@@ -128,7 +129,7 @@ class PredictionRecord(SQLModel, table=True):
     input_data: str = SQLField(nullable=False)  # JSON string of input features
     created_at: datetime = SQLField(default_factory=datetime.now, nullable=False)
 
-    # Relationship to User 
+    # Relationship to User
     user: Optional["User"] = Relationship(back_populates="predictions")
 
 

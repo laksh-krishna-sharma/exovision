@@ -167,6 +167,7 @@ class PredictionService:
             # Check if user exists (to enforce relationship integrity)
             if user_id:
                 from sqlmodel import select
+
                 user_query = select(User).where(User.id == user_id)
                 user_result = await db.execute(user_query)
                 user = user_result.scalar_one_or_none()
