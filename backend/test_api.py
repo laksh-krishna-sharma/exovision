@@ -77,14 +77,14 @@ def get_predictions() -> Dict[str, Any]:
         return {}
 
 
-def delete_prediction(prediction_id: str) -> Dict[str, Any]:
-    """Delete a specific prediction"""
-    response = requests.delete(f"{BASE_URL}/predictions/{prediction_id}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error: {response.status_code} - {response.text}")
-        return {}
+# def delete_prediction(prediction_id: str) -> Dict[str, Any]:
+#     """Delete a specific prediction"""
+#     response = requests.delete(f"{BASE_URL}/predictions/{prediction_id}")
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         print(f"Error: {response.status_code} - {response.text}")
+#         return {}
 
 
 if __name__ == "__main__":
@@ -109,13 +109,13 @@ if __name__ == "__main__":
                     f"  - ID: {pred['prediction_id'][:8]}... Prediction: {pred['prediction']} Confidence: {pred['confidence']:.4f}"
                 )
 
-        # Test deleting a prediction
-        if prediction_result.get("prediction_id"):
-            print(
-                f"\n3. Deleting prediction {prediction_result['prediction_id'][:8]}..."
-            )
-            delete_result = delete_prediction(prediction_result["prediction_id"])
-            if delete_result:
-                print(f"Delete result: {delete_result['message']}")
+        # # Test deleting a prediction
+        # if prediction_result.get("prediction_id"):
+        #     print(
+        #         f"\n3. Deleting prediction {prediction_result['prediction_id'][:8]}..."
+        #     )
+        #     delete_result = delete_prediction(prediction_result["prediction_id"])
+        #     if delete_result:
+        #         print(f"Delete result: {delete_result['message']}")
 
     print("\nTest completed!")

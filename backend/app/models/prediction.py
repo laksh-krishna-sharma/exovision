@@ -1,7 +1,11 @@
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from datetime import datetime
 from pydantic import BaseModel, Field
+from sqlmodel import Relationship
 from sqlmodel import SQLModel, Field as SQLField
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 
 class PredictionRequest(BaseModel):
@@ -119,11 +123,14 @@ class PredictionRecord(SQLModel, table=True):
 
     id: Optional[int] = SQLField(default=None, primary_key=True, index=True)
     prediction_id: str = SQLField(unique=True, index=True, nullable=False)
-    user_id: Optional[int] = SQLField(default=None, foreign_key="user.id")
+    user_id: Optional[int] = SQLField(default=None, foreign_key="users.id")
     prediction: int = SQLField(nullable=False)
     confidence: float = SQLField(nullable=False)
     input_data: str = SQLField(nullable=False)  # JSON string of input features
     created_at: datetime = SQLField(default_factory=datetime.now, nullable=False)
+
+    # Relationship to User
+    user: Optional["User"] = Relationship(back_populates="predictions")
 
 
 class PredictionListResponse(BaseModel):

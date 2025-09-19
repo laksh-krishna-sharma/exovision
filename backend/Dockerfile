@@ -29,8 +29,4 @@ ENV PYTHONPATH="/app"
 ENV PORT=8000
 
 # Use ENTRYPOINT to run uvicorn with single worker for development
-ENTRYPOINT ["uvicorn", "app.main:app", \
-            "--host", "0.0.0.0", \
-            "--port", "8000", \
-            "--workers", "5", \
-            "--log-level", "info"]
+ENTRYPOINT ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-c", "gunicorn_conf.py", "app.main:app"]
