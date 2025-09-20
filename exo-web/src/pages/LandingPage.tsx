@@ -26,8 +26,19 @@ const LandingPage = () => {
         {isAuthenticated ? (
           <div className="flex flex-col items-center gap-3 pointer-events-auto">
             <div className="flex gap-3">
-              <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
-              <Button variant="destructive" onClick={() => dispatch(logout())}>
+              <Button
+                onClick={() => navigate("/home")}
+                className="bg-black/10 text-white hover:bg-black/20 border border-white/20 
+             hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
+              >
+                Go to Home
+              </Button>
+
+              <Button
+                onClick={() => dispatch(logout())}
+                className="bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 
+             hover:shadow-[0_0_30px_rgba(255,50,50,0.5)] transition-shadow"
+              >
                 Logout
               </Button>
             </div>
@@ -36,7 +47,7 @@ const LandingPage = () => {
           <div className="flex gap-3 pointer-events-auto">
             <Button
               onClick={() => navigate("/login")}
-              className="bg-white/10 text-white hover:bg-white/20 border border-white/20 
+              className="bg-black/10 text-white hover:bg-black/20 border border-white/20 
                          hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
             >
               Start now

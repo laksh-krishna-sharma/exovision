@@ -6,7 +6,7 @@ import { useAppDispatch } from "@/store/index";
 import { login } from "@/store/slices/auth/loginSlice";
 import SpaceBackground from "@/components/spacebackground";
 import { motion } from "framer-motion";
-import SpaceObjects from "@/components/spaceobject";
+// import SpaceObjects from "@/components/spaceobject";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -34,7 +34,7 @@ const LoginPage = () => {
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center">
       {/* Backgrounds */}
       <SpaceBackground />
-      <SpaceObjects />
+      {/* <SpaceObjects /> */}
 
       {/* Login Card */}
       <motion.div
