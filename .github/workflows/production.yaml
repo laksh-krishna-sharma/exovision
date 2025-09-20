@@ -1,4 +1,4 @@
-name: Vercel Pre Production Deployment
+name: Vercel Production Deployment
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
@@ -13,7 +13,7 @@ on:
 
 jobs:
   deploy:
-    name: Pre Production Deployment
+    name: Production Deployment
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -25,13 +25,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Verify directory
-        run: ls -la
-
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: ${{ matrix.bun-version }}
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
