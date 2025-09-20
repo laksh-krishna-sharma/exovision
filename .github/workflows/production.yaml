@@ -25,8 +25,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Verify directory
+        run: ls -la
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: ${{ matrix.bun-version }}
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
