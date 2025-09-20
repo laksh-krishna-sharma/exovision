@@ -66,9 +66,9 @@ const initialState: PredictState = {
 
 export const makePrediction = createAsyncThunk(
   'prediction/makePrediction',
-  async (params: PredictionParams, { rejectWithValue }) => {
+  async ({ params, user_id }: { params: PredictionParams; user_id: number }, { rejectWithValue }) => {
     try {
-      const response = await api.post('/predictions/predict', params);
+      const response = await api.post(`/predictions/predict?user_id=${user_id}`, { ...params });
       return response.data;
     } catch (error: unknown) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to make prediction');

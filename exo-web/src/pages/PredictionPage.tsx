@@ -33,19 +33,25 @@ const PredictionPage: React.FC = () => {
     (state: RootState) => state.deletePredictByIdData
   );
 
+  const user_id = parseInt(localStorage.getItem('user_id') || '0');
+
   // Load predictions on mount
   useEffect(() => {
-    dispatch(fetchPredictions({}));
-  }, [dispatch]);
+    if (user_id) {
+      dispatch(fetchPredictions({ user_id }));
+    }
+  }, [dispatch, user_id]);
 
   // Toast effects
   useEffect(() => {
     if (prediction) {
       toast.success(`Prediction completed: ${prediction.prediction} (${prediction.confidence.toFixed(2)}%)`);
-      dispatch(fetchPredictions({}));
+      if (user_id) {
+        dispatch(fetchPredictions({ user_id }));
+      }
       dispatch(clearPrediction());
     }
-  }, [prediction, dispatch]);
+  }, [prediction, dispatch, user_id]);
 
   useEffect(() => {
     if (predictError) {
@@ -57,10 +63,10 @@ const PredictionPage: React.FC = () => {
   useEffect(() => {
     if (deleteSuccess) {
       toast.success("Prediction deleted successfully");
-      dispatch(fetchPredictions({}));
+      dispatch(fetchPredictions({user_id}));
       dispatch(resetDeleteState());
     }
-  }, [deleteSuccess, dispatch]);
+  }, [deleteSuccess, dispatch, user_id]);
 
   useEffect(() => {
     if (deleteError) {
@@ -111,7 +117,7 @@ const PredictionPage: React.FC = () => {
       return;
     }
 
-    dispatch(makePrediction(completePredictionData as PredictionParams));
+    dispatch(makePrediction({ params: completePredictionData as PredictionParams, user_id }));
   };
 
   const handleDeletePrediction = (id: string) => {
