@@ -4,8 +4,7 @@ Example usage of the Exoplanet Prediction API
 This script demonstrates how to use the prediction endpoints.
 """
 
-import json
-import requests
+import requests  # type: ignore
 from typing import Dict, Any
 
 # Base URL for your API
@@ -14,7 +13,7 @@ BASE_URL = "http://localhost:8000"
 # Example exoplanet data based on your training features
 example_data = {
     "koi_fpflag_nt": 0.0,
-    "koi_fpflag_ss": 0.0, 
+    "koi_fpflag_ss": 0.0,
     "koi_fpflag_co": 0.0,
     "koi_fpflag_ec": 0.0,
     "koi_period": 3.52474659,
@@ -54,8 +53,9 @@ example_data = {
     "koi_srad_err2": -0.105,
     "ra": 291.93423,
     "dec": 48.141651,
-    "koi_kepmag": 15.347
+    "koi_kepmag": 15.347,
 }
+
 
 def make_prediction(data: Dict[str, Any]) -> Dict[str, Any]:
     """Make a prediction request"""
@@ -66,6 +66,7 @@ def make_prediction(data: Dict[str, Any]) -> Dict[str, Any]:
         print(f"Error: {response.status_code} - {response.text}")
         return {}
 
+
 def get_predictions() -> Dict[str, Any]:
     """Get prediction history"""
     response = requests.get(f"{BASE_URL}/predictions/")
@@ -75,19 +76,21 @@ def get_predictions() -> Dict[str, Any]:
         print(f"Error: {response.status_code} - {response.text}")
         return {}
 
-def delete_prediction(prediction_id: str) -> Dict[str, Any]:
-    """Delete a specific prediction"""
-    response = requests.delete(f"{BASE_URL}/predictions/{prediction_id}")
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Error: {response.status_code} - {response.text}")
-        return {}
+
+# def delete_prediction(prediction_id: str) -> Dict[str, Any]:
+#     """Delete a specific prediction"""
+#     response = requests.delete(f"{BASE_URL}/predictions/{prediction_id}")
+#     if response.status_code == 200:
+#         return response.json()
+#     else:
+#         print(f"Error: {response.status_code} - {response.text}")
+#         return {}
+
 
 if __name__ == "__main__":
     print("ExoVision API Test Script")
     print("=" * 50)
-    
+
     # Test making a prediction
     print("\n1. Making a prediction...")
     prediction_result = make_prediction(example_data)
@@ -95,20 +98,24 @@ if __name__ == "__main__":
         print(f"Prediction: {prediction_result['prediction']}")
         print(f"Confidence: {prediction_result['confidence']:.4f}")
         print(f"Prediction ID: {prediction_result['prediction_id']}")
-        
+
         # Test getting predictions
         print("\n2. Getting prediction history...")
         history = get_predictions()
         if history:
             print(f"Total predictions: {history['total']}")
-            for pred in history['predictions'][:5]:  # Show first 5
-                print(f"  - ID: {pred['prediction_id'][:8]}... Prediction: {pred['prediction']} Confidence: {pred['confidence']:.4f}")
-        
-        # Test deleting a prediction
-        if prediction_result.get('prediction_id'):
-            print(f"\n3. Deleting prediction {prediction_result['prediction_id'][:8]}...")
-            delete_result = delete_prediction(prediction_result['prediction_id'])
-            if delete_result:
-                print(f"Delete result: {delete_result['message']}")
-    
+            for pred in history["predictions"][:5]:  # Show first 5
+                print(
+                    f"  - ID: {pred['prediction_id'][:8]}... Prediction: {pred['prediction']} Confidence: {pred['confidence']:.4f}"
+                )
+
+        # # Test deleting a prediction
+        # if prediction_result.get("prediction_id"):
+        #     print(
+        #         f"\n3. Deleting prediction {prediction_result['prediction_id'][:8]}..."
+        #     )
+        #     delete_result = delete_prediction(prediction_result["prediction_id"])
+        #     if delete_result:
+        #         print(f"Delete result: {delete_result['message']}")
+
     print("\nTest completed!")
