@@ -19,27 +19,38 @@ const LandingPage = () => {
 
       {/* Overlay Content */}
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen gap-6 p-6 pointer-events-none">
-        <h1 className="text-4xl font-bold text-white pointer-events-auto">
+        <h1 className="text-4xl font-bold text-white md:text-6xl pointer-events-auto">
           Exovision
         </h1>
-        <p className="text-gray-200 max-w-xl text-center pointer-events-auto">
-          Landing page for Exovision. Please login or sign up to continue.
-        </p>
 
         {isAuthenticated ? (
           <div className="flex flex-col items-center gap-3 pointer-events-auto">
             <div className="flex gap-3">
-              <Button onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
-              <Button variant="destructive" onClick={() => dispatch(logout())}>
+              <Button
+                onClick={() => navigate("/home")}
+                className="bg-black/10 text-white hover:bg-black/20 border border-white/20 
+             hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
+              >
+                Go to Home
+              </Button>
+
+              <Button
+                onClick={() => dispatch(logout())}
+                className="bg-red-500/20 text-red-300 hover:bg-red-500/30 border border-red-500/30 
+             hover:shadow-[0_0_30px_rgba(255,50,50,0.5)] transition-shadow"
+              >
                 Logout
               </Button>
             </div>
           </div>
         ) : (
           <div className="flex gap-3 pointer-events-auto">
-            <Button onClick={() => navigate("/login")}>Login</Button>
-            <Button variant="outline" onClick={() => navigate("/signup")}>
-              Sign up
+            <Button
+              onClick={() => navigate("/login")}
+              className="bg-black/10 text-white hover:bg-black/20 border border-white/20 
+                         hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
+            >
+              Start now
             </Button>
           </div>
         )}

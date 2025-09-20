@@ -6,6 +6,7 @@ import { useAppDispatch } from "@/store/index";
 import { login } from "@/store/slices/auth/loginSlice";
 import SpaceBackground from "@/components/spacebackground";
 import { motion } from "framer-motion";
+// import SpaceObjects from "@/components/spaceobject";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,28 +15,58 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    if (!email || !password) {
-      return alert("Please enter email and password");
-    }
+    if (!email || !password) return alert("Please enter email and password");
     dispatch(login({ email, password }));
     navigate("/home"); // Redirect to Home.tsx
   };
 
+  // Card hover tilt logic
+  const [cardRotate, setCardRotate] = useState({ x: 0, y: 0 });
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 10; // max 10deg
+    const y = -((e.clientY - rect.top) / rect.height - 0.5) * 10;
+    setCardRotate({ x, y });
+  };
+  const handleMouseLeave = () => setCardRotate({ x: 0, y: 0 });
+
   return (
     <div className="relative w-full h-screen overflow-hidden flex items-center justify-center">
-      {/* 2D Space Background */}
+      {/* Backgrounds */}
       <SpaceBackground />
+      {/* <SpaceObjects /> */}
 
-      {/* Login Form with 3D fly-in animation */}
+      {/* Login Card */}
       <motion.div
-        initial={{ scale: 0.5, opacity: 0, z: -500 }}
-        animate={{ scale: 1, opacity: 1, z: 0 }}
-        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} // spring-like bounce
         style={{ transformPerspective: 1000 }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        initial={{ scale: 0.5, opacity: 0 }}
+        animate={{
+          scale: 1,
+          opacity: 1,
+          rotateX: cardRotate.x,
+          rotateY: cardRotate.y,
+        }}
+        transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         className="relative w-full max-w-md p-8 z-10
                    bg-transparent border border-white/10 rounded-xl
                    backdrop-blur-lg shadow-[0_0_20px_rgba(255,255,255,0.1)]"
       >
+        {/* Animated Title */}
+        <motion.h1
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 1, type: "spring", stiffness: 100 }}
+          className="text-4xl font-bold text-white text-center mb-2"
+        >
+          Exovision
+        </motion.h1>
+
+        <p className="text-white/60 text-center mb-6">
+          Explore the universe of exoplanets 🚀
+        </p>
+
         <h2 className="mb-6 text-2xl font-semibold text-white text-center">Login</h2>
 
         <form
@@ -50,18 +81,24 @@ const LoginPage = () => {
             onChange={(e) => setEmail(e.target.value)}
             type="email"
             placeholder="Email"
-            className="bg-white/5 text-white placeholder-white/50 border border-white/20"
+            className="bg-white/5 text-white placeholder-white/50 border border-white/20
+             hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
           />
+
           <Input
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             type="password"
             placeholder="Password"
-            className="bg-white/5 text-white placeholder-white/50 border border-white/20"
+            className="bg-white/5 text-white placeholder-white/50 border border-white/20
+             hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-shadow"
           />
+
+          {/* Button with glow shadow */}
           <Button
             type="submit"
-            className="bg-white/10 text-white hover:bg-white/20 border border-white/20"
+            className="bg-white/10 text-white hover:bg-white/20 border border-white/20 
+                       hover:shadow-[0_0_40px_rgba(0,200,255,0.7)] transition-shadow"
           >
             Login
           </Button>
@@ -78,6 +115,11 @@ const LoginPage = () => {
           </div>
         </form>
       </motion.div>
+
+      {/* Footer Fun Fact */}
+      <p className="absolute bottom-4 text-white/60 text-sm text-center w-full px-4">
+        “Over 5,000 exoplanets discovered... maybe you’ll find the next one 🌌”
+      </p>
     </div>
   );
 };
