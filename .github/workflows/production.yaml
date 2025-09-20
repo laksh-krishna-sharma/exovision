@@ -5,19 +5,19 @@ env:
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
 on:
-  workflow_run:
-    workflows: ["Frontend CI"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+    paths:
+      - "exo-web/**"
 
 jobs:
   deploy:
     name: Production Deployment
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     defaults:
       run:
-        working-directory: exo-web`
+        working-directory: exo-web
     strategy:
       matrix:
         bun-version: ["1.1.34"]
