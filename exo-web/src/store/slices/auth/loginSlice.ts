@@ -8,6 +8,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL;
 // Define the type for auth state
 interface AuthState {
   user: string[] | null;
+  user_id: number | null;
   access_token: string | null;
   loading: boolean;
   error: string | null;
@@ -16,6 +17,7 @@ interface AuthState {
 // Initial state
 const initialState: AuthState = {
   user: null, // no user info from backend
+  user_id: parseInt(localStorage.getItem('user_id') || '0') || null,
   access_token: localStorage.getItem('token'),
   loading: false,
   error: null,
@@ -39,7 +41,7 @@ export const login = createAsyncThunk(
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
 
-      return response.data; // { access_token, token_type }
+      return response.data; // { access_token, token_type, user_id }
     } catch (err: unknown) {
       const errorData = (err as AxiosError)?.response?.data;
       const errorDetail = errorData && typeof errorData === 'object' && 'detail' in errorData ? (errorData as { detail?: string }).detail : undefined;
@@ -55,9 +57,11 @@ const authSlice = createSlice({
   reducers: {
     logout: (state) => {
       state.user = null;
+      state.user_id = null;
       state.access_token = null;
       state.error = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('user_id');
     },
   },
   extraReducers: (builder) => {
@@ -66,10 +70,12 @@ const authSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action: PayloadAction<{ access_token: string }>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<{ access_token: string; user_id: number }>) => {
         state.loading = false;
         state.access_token = action.payload.access_token;
+        state.user_id = action.payload.user_id;
         localStorage.setItem('token', action.payload.access_token);
+        localStorage.setItem('user_id', action.payload.user_id.toString());
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;

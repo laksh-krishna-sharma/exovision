@@ -45,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({ logout }) => {
 
   return (
     <div 
-      className={`fixed top-0 left-0 w-full bg-black text-white z-50 transition-transform duration-300 ease-in-out ${
+      className={`fixed top-0 left-0 w-full bg-black/60 text-white z-50 transition-transform duration-300 ease-in-out ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >

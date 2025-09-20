@@ -25,9 +25,9 @@ const initialState: GetPredictState = {
 
 export const fetchPredictions = createAsyncThunk(
   'getPrediction/fetchPredictions',
-  async ({ skip = 0, limit = 100 }: { skip?: number; limit?: number } = {}, { rejectWithValue }) => {
+  async ({ user_id, skip = 0, limit = 100 }: { user_id: number; skip?: number; limit?: number }, { rejectWithValue }) => {
     try {
-      const response = await api.get(`/predictions/?skip=${skip}&limit=${limit}`);
+      const response = await api.get(`/predictions/?user_id=${user_id}&skip=${skip}&limit=${limit}`);
       return response.data;
     } catch (error: unknown) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch predictions');

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
+import { Input } from '@/components/ui/input';
 import ExtrasDropdown from './ExtrasDropdown';
 import type { Param } from './Types';
 
@@ -39,7 +39,7 @@ const ParametersCard: React.FC<ParametersCardProps> = ({
     <div className="bg-black/30 backdrop-blur-md p-6 rounded-xl shadow-lg w-full max-w-4xl border border-white/10">
       <h2 className="text-xl font-semibold text-white mb-6">Prediction Parameters</h2>
 
-      {/* Primary Parameters with Sliders */}
+      {/* Primary Parameters with Input Boxes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {primaryParams.map((param) => {
           const sliderConfig = getSliderConfig(param.id);
@@ -49,21 +49,32 @@ const ParametersCard: React.FC<ParametersCardProps> = ({
                 {param.label}
               </label>
               <div className="space-y-2">
-                <Slider
+                <Input
                   id={param.id}
-                  value={typeof param.value === 'number' ? param.value : 0}
-                  onValueChange={(value) => onParamChange(param.id, value)}
+                  type="number"
+                  value={typeof param.value === 'number' ? param.value : ''}
+                  onChange={(e) => {
+                    const inputValue = e.target.value;
+                    if (inputValue === '') {
+                      onParamChange(param.id, 0);
+                    } else {
+                      const value = parseFloat(inputValue);
+                      if (!isNaN(value)) {
+                        onParamChange(param.id, value);
+                      }
+                    }
+                  }}
                   min={sliderConfig.min}
                   max={sliderConfig.max}
                   step={sliderConfig.step}
-                  className="w-full"
+                  className="w-full bg-black/20 border-white/20 text-white placeholder-white/50"
                 />
                 <div className="flex justify-between text-xs text-white/50">
-                  <span>{sliderConfig.min}</span>
+                  <span>Min: {sliderConfig.min}</span>
                   <span className="text-white font-medium">
-                    {typeof param.value === 'number' ? param.value.toFixed(1) : param.value}
+                    Current: {typeof param.value === 'number' ? param.value.toFixed(1) : param.value}
                   </span>
-                  <span>{sliderConfig.max}</span>
+                  <span>Max: {sliderConfig.max}</span>
                 </div>
               </div>
             </div>
