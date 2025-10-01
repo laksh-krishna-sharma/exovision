@@ -9,12 +9,7 @@ from sqlmodel import select
 from sqlalchemy import desc
 from app.models.user import User
 
-try:
-    import tensorflow as tf
-    from tensorflow import keras
-except ImportError:
-    tf = None
-    keras = None
+from joblib import load  # for sklearn models
 
 from app.models.prediction import (
     PredictionRequest,
@@ -27,23 +22,13 @@ log = get_logger(__name__)
 
 
 def find_model_file() -> str:
-    """Find the model file in various possible locations"""
+    """Find the Random Forest model file in various possible locations"""
     possible_paths = [
-        # Relative to current file
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "../../models/kepler_ann.keras"
-        ),
-        # Relative to project root
-        os.path.join(os.getcwd(), "models/kepler_ann.keras"),
-        # Docker path
-        "/app/models/kepler_ann.keras",
-        # Alternative relative path
-        os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            "../../../models/kepler_ann.keras",
-        ),
-        # Absolute path based on known structure
-        "/home/mrzoro/Desktop/Hackathon/exovision/backend/models/kepler_ann.keras",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../models/rf_model.joblib"),
+        os.path.join(os.getcwd(), "models/rf_model.joblib"),
+        "/app/models/rf_model.joblib",  # Docker path
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../models/rf_model.joblib"),
+        "/home/mrzoro/Desktop/Hackathon/exovision/backend/models/rf_model.joblib",
     ]
 
     for path in possible_paths:
@@ -52,7 +37,7 @@ def find_model_file() -> str:
             return abs_path
 
     raise FileNotFoundError(
-        f"Model file 'kepler_ann.keras' not found in any of the expected locations: {possible_paths}"
+        f"Model file 'rf_model.joblib' not found in any expected locations: {possible_paths}"
     )
 
 
@@ -60,8 +45,7 @@ class PredictionService:
     def __init__(self) -> None:
         self.model = None
         self.model_path = find_model_file()
-        # Use only 20 features to match the model's expected input shape
-        # Selected key features without error terms to reduce dimensionality
+        # Features expected by the RF model (keep same as trained)
         self.feature_columns = [
             "koi_fpflag_nt",
             "koi_fpflag_ss",
@@ -86,98 +70,50 @@ class PredictionService:
         ]
 
     def load_model(self) -> Any:
-        """Load the trained Keras model"""
+        """Load the trained Random Forest model"""
         if self.model is None:
-            if tf is None:
-                raise ImportError(
-                    "TensorFlow is not installed. Please install it to use predictions."
-                )
-
-            # Log the resolved path for debugging
-            log.info(f"Attempting to load model from: {self.model_path}")
-            log.info(f"Model path exists: {os.path.exists(self.model_path)}")
-
+            log.info(f"Loading RF model from: {self.model_path}")
             if not os.path.exists(self.model_path):
-                # Try alternative paths
-                alternative_paths = [
-                    os.path.join(os.getcwd(), "models/kepler_ann.keras"),
-                    "/app/models/kepler_ann.keras",  # Docker path
-                    os.path.join(
-                        os.path.dirname(os.path.abspath(__file__)),
-                        "../../../models/kepler_ann.keras",
-                    ),
-                ]
-
-                for alt_path in alternative_paths:
-                    log.info(f"Trying alternative path: {alt_path}")
-                    if os.path.exists(alt_path):
-                        self.model_path = alt_path
-                        log.info(f"Found model at alternative path: {alt_path}")
-                        break
-                else:
-                    raise FileNotFoundError(
-                        f"Model file not found at {self.model_path} or any alternative paths"
-                    )
-
+                raise FileNotFoundError(f"RF model not found at {self.model_path}")
             try:
-                if keras is None:
-                    raise ImportError("Keras is not available")
-                self.model = keras.models.load_model(self.model_path)
-                log.info(f"Model loaded successfully from {self.model_path}")
+                self.model = load(self.model_path)
+                log.info(f"RF model loaded successfully from {self.model_path}")
             except Exception as e:
-                log.error(f"Failed to load model: {str(e)}")
+                log.error(f"Failed to load RF model: {str(e)}")
                 raise
-
         return self.model
 
     def preprocess_input(self, data: PredictionRequest) -> np.ndarray:
-        """Preprocess input data for prediction"""
-        # Convert PredictionRequest to dictionary
+        """Preprocess input for RF prediction"""
         input_dict = data.model_dump()
-
-        # Create DataFrame with the expected feature order
         df = pd.DataFrame([input_dict])
-
-        # Ensure all required features are present and in the correct order
         df = df[self.feature_columns]
-
         return df.values.astype(np.float32)
 
     async def predict(
         self, data: PredictionRequest, db: AsyncSession, user_id: Optional[int] = None
     ) -> PredictionResponse:
-        """Make a prediction for exoplanet detection"""
+        """Make a prediction using Random Forest"""
         try:
-            # Load model if not already loaded
             model = self.load_model()
-
-            # Preprocess input
             input_data = self.preprocess_input(data)
 
-            # Make prediction
-            prediction_proba = model.predict(input_data)
-
-            # Extract prediction and confidence
-            confidence = float(prediction_proba[0][0])
+            prediction_proba = model.predict_proba(input_data)[:, 1]  # probability of class 1
+            confidence = float(prediction_proba[0])
             prediction = 1 if confidence > 0.5 else 0
 
-            # Generate unique prediction ID
             prediction_id = str(uuid.uuid4())
 
-            # Check if user exists (to enforce relationship integrity)
             if user_id:
-                from sqlmodel import select
-
                 user_query = select(User).where(User.id == user_id)
                 user_result = await db.execute(user_query)
                 user = user_result.scalar_one_or_none()
                 if not user:
                     raise ValueError(f"User with ID {user_id} does not exist")
 
-            # Save prediction to database
             prediction_record = PredictionRecord(
                 prediction_id=prediction_id,
-                user_id=user_id,  # Now consistently int
+                user_id=user_id,
                 prediction=prediction,
                 confidence=confidence,
                 input_data=json.dumps(data.model_dump()),
@@ -188,7 +124,7 @@ class PredictionService:
             await db.refresh(prediction_record)
 
             log.info(
-                f"Prediction made: ID={prediction_id}, Result={prediction}, Confidence={confidence}"
+                f"RF Prediction: ID={prediction_id}, Result={prediction}, Confidence={confidence}"
             )
 
             return PredictionResponse(
@@ -212,15 +148,9 @@ class PredictionService:
         """Get prediction history"""
         try:
             query = select(PredictionRecord)
-
             if user_id:
-                query = query.where(PredictionRecord.user_id == user_id)  # Now int
-
-            query = (
-                query.offset(skip)
-                .limit(limit)
-                .order_by(desc(PredictionRecord.created_at))
-            )
+                query = query.where(PredictionRecord.user_id == user_id)
+            query = query.offset(skip).limit(limit).order_by(desc(PredictionRecord.created_at))
 
             result = await db.execute(query)
             predictions = result.scalars().all()
@@ -234,7 +164,6 @@ class PredictionService:
                 )
                 for pred in predictions
             ]
-
         except Exception as e:
             log.error(f"Failed to get predictions: {str(e)}")
             raise
@@ -242,24 +171,19 @@ class PredictionService:
     async def delete_prediction(
         self, db: AsyncSession, prediction_id: str, user_id: Optional[int] = None
     ) -> bool:
-        """Delete a specific prediction"""
+        """Delete a prediction"""
         try:
-            query = select(PredictionRecord).where(
-                PredictionRecord.prediction_id == prediction_id
-            )
-
+            query = select(PredictionRecord).where(PredictionRecord.prediction_id == prediction_id)
             if user_id:
-                query = query.where(PredictionRecord.user_id == user_id)  # Now int
-
+                query = query.where(PredictionRecord.user_id == user_id)
             result = await db.execute(query)
             prediction = result.scalar_one_or_none()
 
             if prediction:
                 await db.delete(prediction)
                 await db.commit()
-                log.info(f"Prediction deleted: ID={prediction_id}")
+                log.info(f"Deleted prediction ID={prediction_id}")
                 return True
-
             return False
 
         except Exception as e:
