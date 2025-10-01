@@ -24,10 +24,15 @@ log = get_logger(__name__)
 def find_model_file() -> str:
     """Find the Random Forest model file in various possible locations"""
     possible_paths = [
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../models/rf_model.joblib"),
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "../../models/rf_model.joblib"
+        ),
         os.path.join(os.getcwd(), "models/rf_model.joblib"),
         "/app/models/rf_model.joblib",  # Docker path
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../../models/rf_model.joblib"),
+        os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "../../../models/rf_model.joblib",
+        ),
         "/home/mrzoro/Desktop/Hackathon/exovision/backend/models/rf_model.joblib",
     ]
 
@@ -98,7 +103,9 @@ class PredictionService:
             model = self.load_model()
             input_data = self.preprocess_input(data)
 
-            prediction_proba = model.predict_proba(input_data)[:, 1]  # probability of class 1
+            prediction_proba = model.predict_proba(input_data)[
+                :, 1
+            ]  # probability of class 1
             confidence = float(prediction_proba[0])
             prediction = 1 if confidence > 0.5 else 0
 
@@ -150,7 +157,11 @@ class PredictionService:
             query = select(PredictionRecord)
             if user_id:
                 query = query.where(PredictionRecord.user_id == user_id)
-            query = query.offset(skip).limit(limit).order_by(desc(PredictionRecord.created_at))
+            query = (
+                query.offset(skip)
+                .limit(limit)
+                .order_by(desc(PredictionRecord.created_at))
+            )
 
             result = await db.execute(query)
             predictions = result.scalars().all()
@@ -173,7 +184,9 @@ class PredictionService:
     ) -> bool:
         """Delete a prediction"""
         try:
-            query = select(PredictionRecord).where(PredictionRecord.prediction_id == prediction_id)
+            query = select(PredictionRecord).where(
+                PredictionRecord.prediction_id == prediction_id
+            )
             if user_id:
                 query = query.where(PredictionRecord.user_id == user_id)
             result = await db.execute(query)
