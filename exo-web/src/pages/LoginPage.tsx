@@ -29,6 +29,7 @@ const LoginPage = () => {
     } else {
       toast.error("Invalid email or password");
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     toast.error("Login failed. Please try again.");
   }
