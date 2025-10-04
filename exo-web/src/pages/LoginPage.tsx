@@ -16,24 +16,30 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-  if (!email || !password) {
-    return toast.error("Enter email and password");
-  }
-
-  try {
-    const result = await dispatch(login({ email, password }));
-
-    if (result.payload && typeof result.payload === 'object' && 'access_token' in result.payload) {
-      navigate("/home");
-      toast.success("Login successful!");
-    } else {
-      toast.error("Invalid email or password");
+    if (!email || !password) {
+      return toast.error("Enter email and password");
     }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (error) {
-    toast.error("Login failed. Please try again.");
-  }
-};
+
+    try {
+      console.log('Attempting login...');
+      const result = await dispatch(login({ email, password }));
+
+      if (login.fulfilled.match(result)) {
+        console.log('Login successful:', result.payload);
+        toast.success("Login successful!");
+        navigate("/home");
+      } else {
+        console.error('Login failed:', result);
+        const errorMessage = typeof result.payload === 'string' 
+          ? result.payload 
+          : "Invalid email or password";
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("Login failed. Please try again.");
+    }
+  };
 
 
   // Card hover tilt logic

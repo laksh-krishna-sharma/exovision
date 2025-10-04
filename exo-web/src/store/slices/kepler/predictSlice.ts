@@ -68,10 +68,27 @@ export const makePrediction = createAsyncThunk(
   'prediction/makePrediction',
   async ({ params, user_id }: { params: PredictionParams; user_id: number }, { rejectWithValue }) => {
     try {
+      console.log('Making Kepler prediction for user:', user_id);
+      console.log('Prediction params:', params);
+      
       const response = await api.post(`/predictions/predict?user_id=${user_id}`, { ...params });
+      
+      console.log('Prediction response:', response.data);
       return response.data;
-    } catch (error: unknown) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to make prediction');
+    } catch (error) {
+      console.error('Prediction error:', error);
+      
+      if (error instanceof Error) {
+        const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
+        const errorMessage = axiosError.response?.data?.detail 
+          || axiosError.response?.data?.message 
+          || error.message 
+          || 'Failed to make prediction';
+        
+        return rejectWithValue(errorMessage);
+      }
+      
+      return rejectWithValue('Failed to make prediction');
     }
   }
 );

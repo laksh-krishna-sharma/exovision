@@ -15,6 +15,7 @@ from app.config import settings
 from app.utilities.logger import logger
 
 # Import models so SQLModel can create tables
+from app.models import User, PredictionRecord, TessPredictionRecord  # noqa: F401
 
 log = logger(__name__)
 
