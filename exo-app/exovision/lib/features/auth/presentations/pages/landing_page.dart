@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -5,11 +6,112 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../app/theme/colors.dart';
 import '../../../../app/theme/text_styles.dart';
-import '../../../../shared/widgets/common/planet_scene.dart';
+import '../../../../shared/widgets/common/space_background.dart';
+import '../../../../shared/widgets/inputs/glow_text_field.dart';
+import '../../../../shared/widgets/buttons/glow_button.dart';
 import '../providers/auth_provider.dart';
 
-class LandingPage extends StatelessWidget {
-  const LandingPage({super.key});
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  
+  // Card tilt animation states
+  double _xRotation = 0;
+  double _yRotation = 0;
+  bool _isHovered = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _handleMouseMove(PointerEvent details, BuildContext context, double cardWidth, double cardHeight) {
+    if (!mounted) return;
+    
+    final RenderBox? box = context.findRenderObject() as RenderBox?;
+    if (box == null) return;
+    
+    final offset = box.globalToLocal(details.position);
+    
+    final x = (offset.dx / cardWidth - 0.5) * 8; // Reduced from 10 to 8 degrees for smoother effect
+    final y = -(offset.dy / cardHeight - 0.5) * 8; // Use actual card height instead of fixed 500
+    
+    setState(() {
+      _xRotation = x;
+      _yRotation = y;
+    });
+  }
+
+  void _handleMouseEnter() {
+    setState(() => _isHovered = true);
+  }
+
+  void _handleMouseLeave() {
+    setState(() {
+      _isHovered = false;
+      _xRotation = 0;
+      _yRotation = 0;
+    });
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final authProvider = context.read<AuthProvider>();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    try {
+      await authProvider.login(email, password);
+      if (authProvider.isAuthenticated && mounted) {
+        context.go('/home');
+      }
+    } catch (error) {
+      if (mounted) {
+        _showErrorDialog('Login failed. Please check your credentials and try again.');
+      }
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.white.withOpacity(0.1)),
+        ),
+        title: Text(
+          'Login Error',
+          style: TextStyles.titleMedium.copyWith(color: Colors.white),
+        ),
+        content: Text(
+          message,
+          style: TextStyles.bodyMedium.copyWith(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              'OK',
+              style: TextStyles.bodyMedium.copyWith(color: AppColors.cyan),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,146 +122,288 @@ class LandingPage extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // 3D Planet Background
-          const PlanetScene(),
+          // Space Background
+          const SpaceBackground(),
 
-          // Overlay Content
-          _buildContent(context, isMobile, isTablet),
+          // Login Content
+          Center(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(isMobile ? 20 : 32),
+              child: _buildLoginCard(isMobile, isTablet, screenSize),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, bool isMobile, bool isTablet) {
-    final authProvider = context.watch<AuthProvider>();
-    final isAuthenticated = authProvider.isAuthenticated;
+  Widget _buildLoginCard(bool isMobile, bool isTablet, Size screenSize) {
+    final double cardWidth = isMobile
+        ? screenSize.width * 0.9
+        : (isTablet ? screenSize.width * 0.6 : 400.0);
 
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final estimatedCardHeight = isMobile ? 500.0 : 550.0;
+        
+        return MouseRegion(
+          onEnter: (_) => _handleMouseEnter(),
+          onHover: (event) => _handleMouseMove(event, context, cardWidth, estimatedCardHeight),
+          onExit: (_) => _handleMouseLeave(),
+          child: AnimatedContainer(
+            duration: 300.ms,
+            curve: Curves.easeOut,
+            width: cardWidth,
+            padding: EdgeInsets.all(isMobile ? 24 : 32),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 1,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+                BoxShadow(
+                  color: AppColors.cyan.withOpacity(_isHovered ? 0.2 : 0.1),
+                  blurRadius: 30,
+                  spreadRadius: 2,
+                ),
+              ],
+            ),
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // Perspective
+              ..rotateX(_xRotation * 0.0174533) // Convert to radians
+              ..rotateY(_yRotation * 0.0174533),
+            child: _buildLoginForm(isMobile),
+          ).animate(delay: 300.ms).scale().fadeIn(),
+        );
+      },
+    );
+  }
+
+  Widget _buildLoginForm(bool isMobile) {
+    final authProvider = context.watch<AuthProvider>();
+
+    return Form(
+      key: _formKey,
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // App Title
-          _buildAppTitle(isMobile),
+          // App Logo and Title
+          _buildHeader(isMobile),
           SizedBox(height: isMobile ? 24 : 32),
 
-          // Buttons based on authentication state
-          if (isAuthenticated) 
-            _buildAuthenticatedButtons(context, isMobile)
-          else 
-            _buildUnauthenticatedButtons(context, isMobile),
+          // Email Field
+          GlowTextField(
+            controller: _emailController,
+            labelText: 'Email',
+            keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
+              }
+              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                return 'Please enter a valid email address';
+              }
+              return null;
+            },
+            isMobile: isMobile,
+          ),
+          SizedBox(height: isMobile ? 16 : 20),
+
+          // Password Field
+          GlowTextField(
+            controller: _passwordController,
+            labelText: 'Password',
+            obscureText: true,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              }
+              if (value.length < 6) {
+                return 'Password must be at least 6 characters';
+              }
+              return null;
+            },
+            isMobile: isMobile,
+          ),
+          SizedBox(height: isMobile ? 24 : 32),
+
+          // Login Button
+          if (authProvider.isLoading)
+            _buildLoadingIndicator(isMobile)
+          else
+            _buildLoginButton(isMobile),
+
+          SizedBox(height: isMobile ? 20 : 24),
+
+          // Sign Up Link
+          _buildSignUpLink(isMobile),
+
+          SizedBox(height: isMobile ? 8 : 12),
+
+          // Footer Fun Fact
+          _buildFooter(isMobile),
         ],
       ),
     );
   }
 
-  Widget _buildAppTitle(bool isMobile) {
-    return Text(
-      'Exovision',
-      style: isMobile
-          ? TextStyles.headlineLarge.copyWith(
-              fontSize: 48,
-              fontWeight: FontWeight.w800,
-            )
-          : TextStyles.headlineLarge.copyWith(
-              fontSize: 64,
-              fontWeight: FontWeight.w800,
-            ),
-      textAlign: TextAlign.center,
-    ).animate(delay: 300.ms).scale().fadeIn();
-  }
-
-  Widget _buildAuthenticatedButtons(BuildContext context, bool isMobile) {
+  Widget _buildHeader(bool isMobile) {
     return Column(
-      mainAxisSize: MainAxisSize.min,
       children: [
-        _buildButton(
-          text: 'Go to Home',
-          onPressed: () => context.go('/home'),
-          isPrimary: true,
-          isMobile: isMobile,
+        // App Icon
+        Container(
+          width: isMobile ? 60 : 80,
+          height: isMobile ? 60 : 80,
+          decoration: BoxDecoration(
+            gradient: AppColors.buttonGradient,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cyan.withOpacity(0.4),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Icon(
+            Icons.rocket_launch,
+            color: Colors.white,
+            size: isMobile ? 30 : 40,
+          ),
         ),
-        SizedBox(height: isMobile ? 12 : 16),
-        _buildButton(
-          text: 'Logout',
-          onPressed: () {
-            context.read<AuthProvider>().logout();
-            context.go('/');
-          },
-          isPrimary: false,
-          isMobile: isMobile,
-          isDestructive: true,
+        SizedBox(height: isMobile ? 16 : 20),
+
+        // App Name
+        Text(
+          'Exovision',
+          style: isMobile
+              ? TextStyles.headlineMedium.copyWith(
+                  fontWeight: FontWeight.w800,
+                )
+              : TextStyles.headlineLarge.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+        ),
+        SizedBox(height: isMobile ? 4 : 8),
+
+        // Subtitle
+        Text(
+          'Explore the universe of exoplanets 🚀',
+          style: isMobile
+              ? TextStyles.bodyMedium.copyWith(
+                  color: Colors.white.withOpacity(0.6),
+                )
+              : TextStyles.bodyLarge.copyWith(
+                  color: Colors.white.withOpacity(0.6),
+                ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: isMobile ? 8 : 12),
+
+        // Login Title
+        Text(
+          'Login',
+          style: isMobile
+              ? TextStyles.titleLarge.copyWith(
+                  fontWeight: FontWeight.w600,
+                )
+              : TextStyles.headlineSmall.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
         ),
       ],
-    ).animate(delay: 500.ms).slideY(begin: 0.5).fadeIn();
+    ).animate(delay: 500.ms).slideY(begin: -0.5).fadeIn();
   }
 
-  Widget _buildUnauthenticatedButtons(BuildContext context, bool isMobile) {
-    return _buildButton(
-      text: 'Start Now',
-      onPressed: () => context.go('/login'),
+  Widget _buildLoginButton(bool isMobile) {
+    return GlowButton(
+      onPressed: _handleLogin,
+      text: 'Login',
       isPrimary: true,
       isMobile: isMobile,
-    ).animate(delay: 500.ms).slideY(begin: 0.5).fadeIn();
+    );
   }
 
-  Widget _buildButton({
-    required String text,
-    required VoidCallback onPressed,
-    required bool isPrimary,
-    required bool isMobile,
-    bool isDestructive = false,
-  }) {
-    final buttonColor = isDestructive 
-        ? Colors.red 
-        : (isPrimary ? null : Colors.transparent);
-
-    return MouseRegion(
-      cursor: SystemMouseCursors.click,
-      child: GestureDetector(
-        onTap: onPressed,
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: isMobile ? 24 : 32,
-            vertical: isMobile ? 14 : 16,
+  Widget _buildLoadingIndicator(bool isMobile) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 32 : 40,
+        vertical: isMobile ? 14 : 16,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.primary.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: isMobile ? 16 : 20,
+            height: isMobile ? 16 : 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
           ),
-          decoration: BoxDecoration(
-            gradient: isPrimary && !isDestructive 
-                ? AppColors.buttonGradient 
-                : null,
-            color: buttonColor?.withOpacity(isDestructive ? 0.2 : 1.0),
-            borderRadius: BorderRadius.circular(12),
-            border: isPrimary && !isDestructive 
-                ? null 
-                : Border.all(
-                    color: isDestructive 
-                        ? Colors.red.withOpacity(0.5)
-                        : Colors.white.withOpacity(0.3),
-                    width: 2,
-                  ),
-            boxShadow: isPrimary 
-                ? [
-                    BoxShadow(
-                      color: AppColors.cyan.withOpacity(0.4),
-                      blurRadius: 20,
-                      spreadRadius: 2,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Text(
-            text,
-            style: (isMobile ? TextStyles.bodyLarge : TextStyles.titleMedium)
+          SizedBox(width: isMobile ? 12 : 16),
+          Text(
+            'Logging in...',
+            style: (isMobile ? TextStyles.bodyMedium : TextStyles.bodyLarge)
                 .copyWith(
-              color: isDestructive 
-                  ? Colors.red.withOpacity(0.9)
-                  : (isPrimary ? Colors.white : Colors.white.withOpacity(0.9)),
+              color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildSignUpLink(bool isMobile) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Don\'t have an account? ',
+          style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium)
+              .copyWith(
+            color: Colors.white.withOpacity(0.7),
+          ),
+        ),
+        GestureDetector(
+          onTap: () => context.go('/signup'),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Text(
+              'Sign up',
+              style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium)
+                  .copyWith(
+                color: AppColors.cyan,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFooter(bool isMobile) {
+    return Text(
+      '“Over 5,000 exoplanets discovered... maybe you\'ll find the next one 🌌”',
+      style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium).copyWith(
+        color: Colors.white.withOpacity(0.5),
+        fontStyle: FontStyle.italic,
+      ),
+      textAlign: TextAlign.center,
     );
   }
 }

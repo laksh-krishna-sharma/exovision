@@ -1,108 +1,51 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-
 import '../../../../app/theme/colors.dart';
+
+import '../../../../app/theme/app_theme.dart';
 import '../../../../app/theme/text_styles.dart';
 import '../../../../shared/widgets/common/space_background.dart';
-import '../../../../shared/widgets/inputs/glow_text_field.dart';
-import '../../../../shared/widgets/buttons/glow_button.dart';
-import '../providers/auth_provider.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class LandingPage extends StatefulWidget {
+  const LandingPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<LandingPage> createState() => _LandingPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  
-  // Card tilt animation states
-  double _xRotation = 0;
-  double _yRotation = 0;
-  bool _isHovered = false;
+class _LandingPageState extends State<LandingPage> {
+  int _currentPage = 0;
+  final PageController _pageController = PageController();
+
+  final List<Map<String, String>> _features = [
+    {
+      'title': 'Explore Exoplanets',
+      'description': 'Discover thousands of planets beyond our solar system',
+      'icon': '🌌',
+    },
+    {
+      'title': 'Real-time Data',
+      'description': 'Access the latest exoplanet discoveries and research',
+      'icon': '🛰️',
+    },
+    {
+      'title': 'Interactive Learning',
+      'description': 'Learn about space with immersive visualizations',
+      'icon': '🚀',
+    },
+  ];
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
-  void _handleMouseMove(PointerEvent details, BuildContext context, double cardWidth) {
-    if (!mounted) return;
-    
-    final RenderBox box = context.findRenderObject() as RenderBox;
-    final offset = box.globalToLocal(details.position);
-    
-    final x = (offset.dx / cardWidth - 0.5) * 10; // Max 10 degrees
-    final y = -(offset.dy / 500 - 0.5) * 10; // Fixed height of 500
-    
+  void _onPageChanged(int page) {
     setState(() {
-      _xRotation = x;
-      _yRotation = y;
+      _currentPage = page;
     });
-  }
-
-  void _handleMouseEnter() {
-    setState(() => _isHovered = true);
-  }
-
-  void _handleMouseLeave() {
-    setState(() {
-      _isHovered = false;
-      _xRotation = 0;
-      _yRotation = 0;
-    });
-  }
-
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
-
-    final authProvider = context.read<AuthProvider>();
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    try {
-      await authProvider.login(email, password);
-      if (authProvider.isAuthenticated) {
-        context.go('/home');
-      }
-    } catch (error) {
-      _showErrorDialog('Login failed. Please try again.');
-    }
-  }
-
-  void _showErrorDialog(String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        title: Text(
-          'Error',
-          style: TextStyles.titleMedium.copyWith(color: Colors.white),
-        ),
-        content: Text(
-          message,
-          style: TextStyles.bodyMedium.copyWith(color: Colors.white70),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(
-              'OK',
-              style: TextStyles.bodyMedium.copyWith(color: AppColors.cyan),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -117,279 +60,277 @@ class _LoginPageState extends State<LoginPage> {
           // Space Background
           const SpaceBackground(),
 
-          // Login Content
-          Center(
-            child: SingleChildScrollView(
+          // Content
+          SafeArea(
+            child: Padding(
               padding: EdgeInsets.all(isMobile ? 20 : 32),
-              child: _buildLoginCard(isMobile, isTablet, screenSize),
+              child: Column(
+                children: [
+                  // Header
+                  _buildHeader(isMobile),
+                  SizedBox(height: isMobile ? 40 : 60),
+
+                  // Feature Carousel
+                  Expanded(
+                    child: _buildFeatureCarousel(isMobile, isTablet),
+                  ),
+
+                  // Navigation Dots
+                  _buildPageIndicator(isMobile),
+                  SizedBox(height: isMobile ? 30 : 40),
+
+                  // Action Buttons
+                  _buildActionButtons(isMobile, isTablet),
+                  SizedBox(height: isMobile ? 20 : 30),
+                ],
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLoginCard(bool isMobile, bool isTablet, Size screenSize) {
-    final double cardWidth = isMobile
-        ? screenSize.width * 0.9
-        : (isTablet ? screenSize.width * 0.6 : 400.0);
-
-    return MouseRegion(
-      onEnter: (_) => _handleMouseEnter(),
-      onHover: (event) => _handleMouseMove(event, context, cardWidth),
-      onExit: (_) => _handleMouseLeave(),
-      child: AnimatedContainer(
-        duration: 300.ms,
-        curve: Curves.easeOut,
-        width: cardWidth,
-        padding: EdgeInsets.all(isMobile ? 24 : 32),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.3),
-              blurRadius: 20,
-              spreadRadius: 5,
-            ),
-            BoxShadow(
-              color: AppColors.cyan.withOpacity(_isHovered ? 0.2 : 0.1),
-              blurRadius: 30,
-              spreadRadius: 2,
-            ),
-          ],
-        ),
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, 0.001) // Perspective
-          ..rotateX(_xRotation * 0.0174533) // Convert to radians
-          ..rotateY(_yRotation * 0.0174533),
-        child: _buildLoginForm(isMobile),
-      ).animate(delay: 300.ms).scale().fadeIn(),
-    );
-  }
-
-  Widget _buildLoginForm(bool isMobile) {
-    final authProvider = context.watch<AuthProvider>();
-
-    return Form(
-      key: _formKey,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // App Logo and Title
-          _buildHeader(isMobile),
-          SizedBox(height: isMobile ? 24 : 32),
-
-          // Email Field
-          GlowTextField(
-            controller: _emailController,
-            labelText: 'Email',
-            keyboardType: TextInputType.emailAddress,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your email';
-              }
-              if (!value.contains('@')) {
-                return 'Please enter a valid email';
-              }
-              return null;
-            },
-            isMobile: isMobile,
-          ),
-          SizedBox(height: isMobile ? 16 : 20),
-
-          // Password Field
-          GlowTextField(
-            controller: _passwordController,
-            labelText: 'Password',
-            obscureText: true,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your password';
-              }
-              if (value.length < 6) {
-                return 'Password must be at least 6 characters';
-              }
-              return null;
-            },
-            isMobile: isMobile,
-          ),
-          SizedBox(height: isMobile ? 24 : 32),
-
-          // Login Button
-          if (authProvider.isLoading)
-            _buildLoadingIndicator(isMobile)
-          else
-            _buildLoginButton(isMobile),
-
-          SizedBox(height: isMobile ? 20 : 24),
-
-          // Sign Up Link
-          _buildSignUpLink(isMobile),
-
-          SizedBox(height: isMobile ? 8 : 12),
-
-          // Footer Fun Fact
-          _buildFooter(isMobile),
         ],
       ),
     );
   }
 
   Widget _buildHeader(bool isMobile) {
-    return Column(
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // App Icon
-        Container(
-          width: isMobile ? 60 : 80,
-          height: isMobile ? 60 : 80,
-          decoration: BoxDecoration(
-            gradient: AppColors.buttonGradient,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.cyan.withOpacity(0.4),
-                blurRadius: 20,
-                spreadRadius: 5,
+        // App Logo and Name
+        Row(
+          children: [
+            Container(
+              width: isMobile ? 40 : 50,
+              height: isMobile ? 40 : 50,
+              decoration: BoxDecoration(
+                gradient: AppColors.buttonGradient,
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
+              child: Icon(
+                Icons.rocket_launch,
+                color: Colors.white,
+                size: isMobile ? 20 : 25,
+              ),
+            ),
+            SizedBox(width: isMobile ? 12 : 16),
+            Text(
+              'Exovision',
+              style: isMobile
+                  ? TextStyles.titleLarge.copyWith(
+                      fontWeight: FontWeight.w800,
+                    )
+                  : TextStyles.headlineSmall.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+            ),
+          ],
+        ),
+
+        // Skip for now button on first page only
+        if (_currentPage == 0)
+          TextButton(
+            onPressed: () => context.go('/login'),
+            child: Text(
+              'Skip',
+              style: TextStyles.bodyMedium.copyWith(
+                color: Colors.white.withOpacity(0.7),
+              ),
+            ),
           ),
-          child: Icon(
-            Icons.rocket_launch,
-            color: Colors.white,
-            size: isMobile ? 30 : 40,
-          ),
-        ),
-        SizedBox(height: isMobile ? 16 : 20),
-
-        // App Name
-        Text(
-          'Exovision',
-          style: isMobile
-              ? TextStyles.headlineMedium.copyWith(
-                  fontWeight: FontWeight.w800,
-                )
-              : TextStyles.headlineLarge.copyWith(
-                  fontWeight: FontWeight.w800,
-                ),
-        ),
-        SizedBox(height: isMobile ? 4 : 8),
-
-        // Subtitle
-        Text(
-          'Explore the universe of exoplanets 🚀',
-          style: isMobile
-              ? TextStyles.bodyMedium.copyWith(
-                  color: Colors.white.withOpacity(0.6),
-                )
-              : TextStyles.bodyLarge.copyWith(
-                  color: Colors.white.withOpacity(0.6),
-                ),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(height: isMobile ? 8 : 12),
-
-        // Login Title
-        Text(
-          'Login',
-          style: isMobile
-              ? TextStyles.titleLarge.copyWith(
-                  fontWeight: FontWeight.w600,
-                )
-              : TextStyles.headlineSmall.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
-        ),
       ],
-    ).animate(delay: 500.ms).slideY(begin: -0.5).fadeIn();
+    ).animate(delay: 300.ms).fadeIn().slideY(begin: -0.5);
   }
 
-  Widget _buildLoginButton(bool isMobile) {
-    return GlowButton(
-      onPressed: _handleLogin,
-      text: 'Login',
-      isPrimary: true,
-      isMobile: isMobile,
+  Widget _buildFeatureCarousel(bool isMobile, bool isTablet) {
+    return Column(
+      children: [
+        Expanded(
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            itemCount: _features.length,
+            itemBuilder: (context, index) {
+              final feature = _features[index];
+              return _buildFeaturePage(
+                feature['title']!,
+                feature['description']!,
+                feature['icon']!,
+                isMobile,
+                isTablet,
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildLoadingIndicator(bool isMobile) {
-    return Container(
-      padding: EdgeInsets.symmetric(
-        horizontal: isMobile ? 32 : 40,
-        vertical: isMobile ? 14 : 16,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.primary.withOpacity(0.3),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget _buildFeaturePage(
+    String title,
+    String description,
+    String icon,
+    bool isMobile,
+    bool isTablet,
+  ) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: isMobile ? 16 : 20,
-            height: isMobile ? 16 : 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white,
+          // Feature Icon
+          Container(
+            width: isMobile ? 120 : 160,
+            height: isMobile ? 120 : 160,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(80),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.1),
+                width: 2,
+              ),
             ),
-          ),
-          SizedBox(width: isMobile ? 12 : 16),
+            child: Center(
+              child: Text(
+                icon,
+                style: TextStyle(fontSize: isMobile ? 50 : 70),
+              ),
+            ),
+          ).animate(delay: 500.ms).scale().fadeIn(),
+
+          SizedBox(height: isMobile ? 40 : 60),
+
+          // Feature Title
           Text(
-            'Logging in...',
+            title,
+            style: isMobile
+                ? TextStyles.headlineSmall.copyWith(
+                    fontWeight: FontWeight.w700,
+                  )
+                : TextStyles.headlineMedium.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+            textAlign: TextAlign.center,
+          ).animate(delay: 700.ms).fadeIn().slideY(begin: 0.5),
+
+          SizedBox(height: isMobile ? 16 : 24),
+
+          // Feature Description
+          Text(
+            description,
             style: (isMobile ? TextStyles.bodyMedium : TextStyles.bodyLarge)
                 .copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
+              color: Colors.white.withOpacity(0.7),
+              height: 1.5,
             ),
-          ),
+            textAlign: TextAlign.center,
+          ).animate(delay: 900.ms).fadeIn().slideY(begin: 0.5),
         ],
       ),
     );
   }
 
-  Widget _buildSignUpLink(bool isMobile) {
+  Widget _buildPageIndicator(bool isMobile) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Don\'t have an account? ',
-          style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium)
-              .copyWith(
-            color: Colors.white.withOpacity(0.7),
+      children: List.generate(
+        _features.length,
+        (index) => Container(
+          width: isMobile ? 8 : 10,
+          height: isMobile ? 8 : 10,
+          margin: EdgeInsets.symmetric(horizontal: isMobile ? 4 : 6),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _currentPage == index
+                ? AppColors.cyan
+                : Colors.white.withOpacity(0.3),
           ),
-        ),
-        GestureDetector(
-          onTap: () => context.go('/signup'),
-          child: MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Text(
-              'Sign up',
-              style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium)
-                  .copyWith(
-                color: AppColors.cyan,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
-              ),
-            ),
-          ),
-        ),
-      ],
+        ).animate(delay: 1100.ms).fadeIn(),
+      ),
     );
   }
 
-  Widget _buildFooter(bool isMobile) {
-    return Text(
-      '“Over 5,000 exoplanets discovered... maybe you\'ll find the next one 🌌”',
-      style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium).copyWith(
-        color: Colors.white.withOpacity(0.5),
-        fontStyle: FontStyle.italic,
-      ),
-      textAlign: TextAlign.center,
+  Widget _buildActionButtons(bool isMobile, bool isTablet) {
+    return Column(
+      children: [
+        // Next/Get Started Button
+        Container(
+          width: isMobile ? double.infinity : (isTablet ? 400 : 300),
+          decoration: BoxDecoration(
+            gradient: AppColors.buttonGradient,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.cyan.withOpacity(0.3),
+                blurRadius: 20,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                if (_currentPage < _features.length - 1) {
+                  _pageController.nextPage(
+                    duration: 500.ms,
+                    curve: Curves.easeInOut,
+                  );
+                } else {
+                  context.go('/login');
+                }
+              },
+              borderRadius: BorderRadius.circular(15),
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: isMobile ? 16 : 18,
+                  horizontal: 32,
+                ),
+                child: Center(
+                  child: Text(
+                    _currentPage < _features.length - 1 ? 'Next' : 'Get Started',
+                    style: (isMobile ? TextStyles.bodyLarge : TextStyles.titleMedium)
+                        .copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ).animate(delay: 1300.ms).fadeIn().slideY(begin: 0.5),
+
+        SizedBox(height: isMobile ? 16 : 20),
+
+        // Already have account link
+        if (_currentPage == _features.length - 1)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Already have an account? ',
+                style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium)
+                    .copyWith(
+                  color: Colors.white.withOpacity(0.7),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => context.go('/login'),
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: Text(
+                    'Sign in',
+                    style: (isMobile ? TextStyles.bodySmall : TextStyles.bodyMedium)
+                        .copyWith(
+                      color: AppColors.cyan,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ).animate(delay: 1500.ms).fadeIn(),
+      ],
     );
   }
 }
