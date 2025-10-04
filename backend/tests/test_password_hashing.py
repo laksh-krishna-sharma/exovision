@@ -1,16 +1,27 @@
-from pathlib import Path
+from __future__ import annotations
+
 import sys
+from pathlib import Path
+from typing import Callable, Tuple
 
 import pytest
-
-# Ensure the backend package is importable when running tests directly.
-ROOT_DIR = Path(__file__).resolve().parents[1]
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
-
 from passlib.context import CryptContext
 
-from app.utilities.jwt import hash_password, verify_password
+
+def _load_jwt_utils() -> Tuple[Callable[[str], str], Callable[[str, str], bool]]:
+    """Ensure backend modules are importable and return hashing helpers."""
+
+    root_dir = Path(__file__).resolve().parents[1]
+    if str(root_dir) not in sys.path:
+        sys.path.insert(0, str(root_dir))
+
+    from app.utilities.jwt import hash_password as _hash_password
+    from app.utilities.jwt import verify_password as _verify_password
+
+    return _hash_password, _verify_password
+
+
+hash_password, verify_password = _load_jwt_utils()
 
 
 @pytest.mark.parametrize(

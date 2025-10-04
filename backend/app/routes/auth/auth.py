@@ -34,10 +34,13 @@ async def signup(
         log.warning(f"Signup failed for {request.email}: {e.detail}")
         raise
     except Exception as e:
-        log.error(f"Unexpected error during signup for {request.email}: {str(e)}", exc_info=True)
+        log.error(
+            f"Unexpected error during signup for {request.email}: {str(e)}",
+            exc_info=True,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Signup failed: {str(e)}"
+            detail=f"Signup failed: {str(e)}",
         )
 
 
@@ -68,8 +71,11 @@ async def login(
     except HTTPException:
         raise
     except Exception as e:
-        log.error(f"Unexpected error during login for {form_data.username}: {str(e)}", exc_info=True)
+        log.error(
+            f"Unexpected error during login for {form_data.username}: {str(e)}",
+            exc_info=True,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Login failed: {str(e)}"
+            detail=f"Login failed: {str(e)}",
         )

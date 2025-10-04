@@ -23,7 +23,7 @@ async def signup_user(db: AsyncSession, name: str, email: str, password: str) ->
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered",
             )
-        
+
         log.info(f"Creating new user: {email}")
         hashed_pw = hash_password(password)
         new_user = User(
@@ -52,14 +52,16 @@ async def signup_user(db: AsyncSession, name: str, email: str, password: str) ->
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Database error: {str(e)}"
+            detail=f"Database error: {str(e)}",
         )
     except Exception as e:
-        log.error(f"Unexpected error during signup for {email}: {str(e)}", exc_info=True)
+        log.error(
+            f"Unexpected error during signup for {email}: {str(e)}", exc_info=True
+        )
         await db.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Signup error: {str(e)}"
+            detail=f"Signup error: {str(e)}",
         )
 
 
@@ -80,8 +82,13 @@ async def authenticate_user(
         log.info(f"Authentication successful for {email}")
         return user
     except SQLAlchemyError as e:
-        log.error(f"Database error during authentication for {email}: {str(e)}", exc_info=True)
+        log.error(
+            f"Database error during authentication for {email}: {str(e)}", exc_info=True
+        )
         return None
     except Exception as e:
-        log.error(f"Unexpected error during authentication for {email}: {str(e)}", exc_info=True)
+        log.error(
+            f"Unexpected error during authentication for {email}: {str(e)}",
+            exc_info=True,
+        )
         return None
