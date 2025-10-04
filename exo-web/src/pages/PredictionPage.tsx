@@ -19,6 +19,7 @@ import { deleteTessPredictionById, resetTessDeleteState } from "@/store/slices/t
 import type { RootState } from "@/store";
 import { useAppDispatch } from "@/store";
 import { defaultPrimaryParams, defaultExtraParams } from "@/staticValues/kepler_static_values";
+import { defaultTessPrimaryParams, defaultTessExtraParams } from "@/staticValues/tess_static_values";
 import SpaceBackground from "@/components/spacebackground";
 import Navbar from "@/components/Navbar";
 import { logout } from "@/store/slices/auth/loginSlice";
@@ -30,6 +31,8 @@ const PredictionPage: React.FC = () => {
 
   const [primaryParams, setPrimaryParams] = useState<Param[]>(defaultPrimaryParams);
   const [extraParams, setExtraParams] = useState<Param[]>(defaultExtraParams);
+  const [tessPrimaryParams, setTessPrimaryParams] = useState<Param[]>(defaultTessPrimaryParams);
+  const [tessExtraParams, setTessExtraParams] = useState<Param[]>(defaultTessExtraParams);
 
   const { loading: predictLoading, prediction, error: predictError } = useSelector(
     (state: RootState) => state.keplerPredictionData
@@ -137,6 +140,12 @@ const PredictionPage: React.FC = () => {
     else setExtraParams(updateParams);
   };
 
+  const handleTessParamChange = (id: string, value: string | number) => {
+    const updateParams = (params: Param[]) => params.map((p) => (p.id === id ? { ...p, value } : p));
+    if (tessPrimaryParams.find((p) => p.id === id)) setTessPrimaryParams(updateParams);
+    else setTessExtraParams(updateParams);
+  };
+
   const handleStart = () => {
     if (selectedModel === 'kepler_ann' || selectedModel === 'xgb_full_train') {
       handleKeplerStart();
@@ -214,7 +223,7 @@ const PredictionPage: React.FC = () => {
 
   const handleTessStart = () => {
     const predictionData: Partial<TessPredictionParams> = {};
-    [...primaryParams, ...extraParams].forEach((param) => {
+    [...tessPrimaryParams, ...tessExtraParams].forEach((param) => {
       if (param.value !== "" && param.value !== null && param.value !== undefined) {
         predictionData[param.id as keyof TessPredictionParams] =
           typeof param.value === "string" ? parseFloat(param.value) : param.value;
@@ -323,9 +332,9 @@ const PredictionPage: React.FC = () => {
         ) : selectedModel === 'kepler_ann_savedmodel' ? (
           <>
             <ParametersCardTess
-              primaryParams={primaryParams}
-              extraParams={extraParams}
-              onParamChange={handleParamChange}
+              primaryParams={tessPrimaryParams}
+              extraParams={tessExtraParams}
+              onParamChange={handleTessParamChange}
               onStart={handleStart}
             />
             <PredictionsTableTess predictions={formattedTessPredictions} onDelete={handleDeletePrediction} />
