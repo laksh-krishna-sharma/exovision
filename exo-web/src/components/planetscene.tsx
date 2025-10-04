@@ -1,15 +1,42 @@
-import { Canvas } from "@react-three/fiber";
+// PlanetScene.tsx
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import type { FC } from "react";
-import { Suspense } from "react";
+import { Suspense, useRef } from "react";
+import * as THREE from "three";
 import PlanetModel from "./planetmodel";
+
+const CameraAnimation = () => {
+  const { camera } = useThree();
+  const perspectiveCamera = camera as THREE.PerspectiveCamera; // ✅ cast
+  const progress = useRef(0);
+
+  useFrame((_, delta) => {
+    if (progress.current < 1) {
+      progress.current += delta * 0.3; // control zoom speed
+      const t = THREE.MathUtils.smoothstep(progress.current, 0, 1);
+
+      // starting position (far away)
+      const start = new THREE.Vector3(0, 0, 50);
+      // target position (closer to planet)
+      const end = new THREE.Vector3(0, 1.5, 4.5);
+
+      perspectiveCamera.position.lerpVectors(start, end, t);
+
+      // zoom effect
+      perspectiveCamera.fov = THREE.MathUtils.lerp(75, 45, t);
+      perspectiveCamera.updateProjectionMatrix();
+    }
+  });
+
+  return null;
+};
 
 const PlanetScene: FC = () => {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      {/* 3D Canvas */}
       <Canvas
-        camera={{ position: [0, 1.5, 4.5], fov: 60 }}
+        camera={{ position: [0, 0, 50], fov: 75 }} // start far away
         style={{ width: "100%", height: "100%" }}
         gl={{ antialias: true }}
       >
@@ -18,6 +45,9 @@ const PlanetScene: FC = () => {
           {/* Lights */}
           <ambientLight intensity={0.3} />
           <directionalLight position={[5, 5, 5]} intensity={1} />
+
+          {/* Camera Animation */}
+          <CameraAnimation />
 
           {/* Planet */}
           <PlanetModel scale={1.5} />
