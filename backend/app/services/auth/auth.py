@@ -40,6 +40,13 @@ async def signup_user(db: AsyncSession, name: str, email: str, password: str) ->
         return new_user
     except HTTPException:
         raise
+    except ValueError as e:
+        log.warning(f"Signup validation error for {email}: {str(e)}")
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
     except SQLAlchemyError as e:
         log.error(f"Database error during signup for {email}: {str(e)}", exc_info=True)
         await db.rollback()

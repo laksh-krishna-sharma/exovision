@@ -6,7 +6,7 @@ import { useAppDispatch } from "@/store/index";
 import { login } from "@/store/slices/auth/loginSlice";
 import SpaceBackground from "@/components/spacebackground";
 import { motion } from "framer-motion";
-import { toast }  from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
@@ -16,13 +16,14 @@ const LoginPage = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    if (!email || !password) {
+  const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail || !password) {
       return toast.error("Enter email and password");
     }
 
     try {
       console.log('Attempting login...');
-      const result = await dispatch(login({ email, password }));
+      const result = await dispatch(login({ email: trimmedEmail, password }));
 
       if (login.fulfilled.match(result)) {
         console.log('Login successful:', result.payload);
@@ -36,8 +37,8 @@ const LoginPage = () => {
         toast.error(errorMessage);
       }
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error("Login failed. Please try again.");
+    console.error('Login error:', error);
+    toast.error("Login failed. Please try again.");
     }
   };
 

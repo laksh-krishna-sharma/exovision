@@ -2,8 +2,11 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 // Create an Axios instance
+const defaultBaseURL =
+  typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : "";
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? defaultBaseURL,
   headers: {
     "Content-Type": "application/json",
   },

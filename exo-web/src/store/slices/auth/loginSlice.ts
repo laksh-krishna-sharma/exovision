@@ -3,7 +3,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import axios, { AxiosError } from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL;
+const DEFAULT_BASE_URL =
+  typeof window !== "undefined" ? window.location.origin.replace(/\/$/, "") : "";
+
+const baseURL = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BASE_URL;
 
 // Define the type for auth state
 interface AuthState {

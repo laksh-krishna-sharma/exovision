@@ -19,22 +19,34 @@ const SignupPage = () => {
   const navigate = useNavigate();
 
   const handleSignup = async () => {
-    if (!name || !email || !password || !confirm) {
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedName || !trimmedEmail || !password || !confirm) {
       return toast.error("Please fill all fields");
     }
     if (password !== confirm) {
       return toast.error("Passwords do not match");
     }
+    if (password.length < 8) {
+      return toast.error("Password must be at least 8 characters long");
+    }
+    if (password.length > 128) {
+      return toast.error("Password must be 128 characters or fewer");
+    }
 
     try {
       console.log('Starting signup process...');
-      const signupResult = await dispatch(signup({ name, email, password }));
+      const signupResult = await dispatch(
+        signup({ name: trimmedName, email: trimmedEmail, password })
+      );
       
       if (signup.fulfilled.match(signupResult)) {
         console.log('Signup successful, attempting login...');
         toast.success("Signup successful! Logging you in...");
-        
-        const loginResult = await dispatch(login({ email, password }));
+
+        const loginResult = await dispatch(
+          login({ email: trimmedEmail, password })
+        );
         
         if (login.fulfilled.match(loginResult)) {
           console.log('Login successful, navigating to home...');
