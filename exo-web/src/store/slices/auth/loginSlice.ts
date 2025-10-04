@@ -31,6 +31,8 @@ export const login = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log('Attempting login for:', email);
+      
       const params = new URLSearchParams();
       params.append('username', email); // FastAPI expects "username"
       params.append('password', password);
@@ -41,11 +43,23 @@ export const login = createAsyncThunk(
         { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
 
-      return response.data; // { access_token, token_type, user_id }
+      console.log('Login response:', response.data);
+      
+      // Backend returns user_id as string, convert to number
+      const data = {
+        access_token: response.data.access_token,
+        token_type: response.data.token_type,
+        user_id: parseInt(response.data.user_id, 10)
+      };
+
+      return data;
     } catch (err: unknown) {
+      console.error('Login error:', err);
+      
       const errorData = (err as AxiosError)?.response?.data;
       const errorDetail = errorData && typeof errorData === 'object' && 'detail' in errorData ? (errorData as { detail?: string }).detail : undefined;
-      return rejectWithValue(errorDetail || (err as Error).message);
+      
+      return rejectWithValue(errorDetail || (err as Error).message || 'Login failed');
     }
   }
 );

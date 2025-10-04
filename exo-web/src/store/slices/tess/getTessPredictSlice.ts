@@ -27,10 +27,26 @@ export const fetchTessPredictions = createAsyncThunk(
   'getTessPrediction/fetchTessPredictions',
   async ({ user_id, skip = 0, limit = 100 }: { user_id: number; skip?: number; limit?: number }, { rejectWithValue }) => {
     try {
+      console.log('Fetching TESS predictions for user:', user_id, 'skip:', skip, 'limit:', limit);
+      
       const response = await api.get(`/tess/predictions/?user_id=${user_id}&skip=${skip}&limit=${limit}`);
+      
+      console.log('Fetched TESS predictions:', response.data);
       return response.data;
-    } catch (error: unknown) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch TESS predictions');
+    } catch (error) {
+      console.error('Fetch TESS predictions error:', error);
+      
+      if (error instanceof Error) {
+        const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
+        const errorMessage = axiosError.response?.data?.detail 
+          || axiosError.response?.data?.message 
+          || error.message 
+          || 'Failed to fetch TESS predictions';
+        
+        return rejectWithValue(errorMessage);
+      }
+      
+      return rejectWithValue('Failed to fetch TESS predictions');
     }
   }
 );

@@ -17,10 +17,26 @@ export const deleteTessPredictionById = createAsyncThunk(
   'deleteTessPredictionById/deleteTessPredictionById',
   async (predictionId: string, { rejectWithValue }) => {
     try {
+      console.log('Deleting TESS prediction:', predictionId);
+      
       const response = await api.delete(`/tess/predictions/${predictionId}`);
+      
+      console.log('Delete TESS prediction response:', response.data);
       return response.data;
-    } catch (error: unknown) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to delete TESS prediction');
+    } catch (error) {
+      console.error('Delete TESS prediction error:', error);
+      
+      if (error instanceof Error) {
+        const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
+        const errorMessage = axiosError.response?.data?.detail 
+          || axiosError.response?.data?.message 
+          || error.message 
+          || 'Failed to delete TESS prediction';
+        
+        return rejectWithValue(errorMessage);
+      }
+      
+      return rejectWithValue('Failed to delete TESS prediction');
     }
   }
 );

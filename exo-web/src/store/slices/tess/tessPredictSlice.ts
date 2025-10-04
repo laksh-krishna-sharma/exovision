@@ -36,10 +36,27 @@ export const makeTessPrediction = createAsyncThunk(
   'tessPrediction/makeTessPrediction',
   async ({ params, user_id }: { params: TessPredictionParams; user_id: number }, { rejectWithValue }) => {
     try {
+      console.log('Making TESS prediction for user:', user_id);
+      console.log('TESS prediction params:', params);
+      
       const response = await api.post(`/tess/predictions/predict?user_id=${user_id}`, { ...params });
+      
+      console.log('TESS prediction response:', response.data);
       return response.data;
-    } catch (error: unknown) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to make TESS prediction');
+    } catch (error) {
+      console.error('TESS prediction error:', error);
+      
+      if (error instanceof Error) {
+        const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
+        const errorMessage = axiosError.response?.data?.detail 
+          || axiosError.response?.data?.message 
+          || error.message 
+          || 'Failed to make TESS prediction';
+        
+        return rejectWithValue(errorMessage);
+      }
+      
+      return rejectWithValue('Failed to make TESS prediction');
     }
   }
 );
