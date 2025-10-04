@@ -9,10 +9,6 @@ import {
     keplerGetPredictionData,
     getPredictByIdData,
     deletePredictByIdData,
-    tessPredictionData,
-    tessGetPredictionData,
-    getTessPredictByIdData,
-    deleteTessPredictByIdData,
  } from "./coreReducer";
 
 const persistConfig = {
@@ -28,10 +24,6 @@ const rootReducer = combineReducers({
     keplerGetPredictionData,
     getPredictByIdData,
     deletePredictByIdData,
-    tessPredictionData,
-    tessGetPredictionData,
-    getTessPredictByIdData,
-    deleteTessPredictByIdData,
 });
 
 const persistedReducer = persistReducer<ReturnType<typeof rootReducer>, AnyAction>(

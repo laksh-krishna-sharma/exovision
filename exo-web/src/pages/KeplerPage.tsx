@@ -8,20 +8,6 @@ import { planetParameters } from "@/components/Datasetsinfo/kepler"; // full par
 const KeplerPage = () => {
   const navigate = useNavigate();
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.2 },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
-  };
-
   return (
     <div className="relative min-h-screen text-white overflow-x-hidden flex flex-col">
       {/* Background */}
@@ -51,64 +37,47 @@ const KeplerPage = () => {
         >
           Kepler Dataset Details
         </motion.h1>
-
         <motion.p
-          className="text-lg md:text-2xl text-white/80 max-w-full leading-relaxed"
+          className="text-lg md:text-xl text-white/80 max-w-full leading-relaxed"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.8 }}
         >
-          The Kepler mission observed 150,000 stars in a fixed patch of sky for 4 years,
+          The Kepler mission observed 150,000 stars in a fixed patch of sky for 4 years, 
           producing high-quality light curves that led to thousands of exoplanet discoveries.  
           These datasets contain light curves — measurements of a star’s brightness 
-          over time. By analyzing these dips in brightness, we identify potential exoplanets.
+          over time. By analyzing these dips in brightness, we identify potential 
+          exoplanets.
         </motion.p>
 
-        {/* Basic Parameters */}
-        <div className="w-full">
-          <h2 className="text-4xl font-semibold mb-4">📡 Basic Parameters</h2>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {planetParameters.basic.map((param) => (
-              <motion.div
-                key={param.name}
-                className="p-4 rounded-lg border border-white/20 backdrop-blur-md"
-                variants={cardVariants}
-                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,150,255,0.5)" }}
-              >
-                <h4 className="text-3xl font-semibold mb-1">{param.name}</h4>
-                <p className="text-white/80 text-2xl">{param.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+      {/* Basic Parameters */}
+<div className="w-full">
+  <h2 className="text-2xl font-semibold mb-4">📡 Basic Parameters</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {planetParameters.basic.map((param) => (
+      <div key={param.name} className="p-4 rounded-lg border border-white/20 backdrop-blur-md">
+        <h4 className="text-lg font-semibold mb-1">{param.name}</h4>
+        <p className="text-white/80 text-sm">{param.description}</p>
+      </div>
+    ))}
+  </div>
+</div>
 
-        {/* KOI / Technical Parameters */}
-        <div className="w-full">
-          <h2 className="text-4xl font-semibold text-cyan-300 mb-4">KOI / Technical Parameters</h2>
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            {planetParameters.koi.map((param) => (
-              <motion.div
-                key={param.name}
-                className="p-4 rounded-lg border border-white/20 backdrop-blur-md"
-                variants={cardVariants}
-                whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(0,255,200,0.5)" }}
-              >
-                <h4 className="text-3xl font-semibold mb-1">{param.name}</h4>
-                <p className="text-white/80 text-2xl">{param.description}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
+{/* KOI / Technical Parameters */}
+<div className="w-full">
+  <h2 className="text-2xl font-semibold text-cyan-300 mb-4">KOI / Technical Parameters</h2>
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {planetParameters.koi.map((param) => (
+      <div
+        key={param.name}
+        className="p-4 rounded-lg border border-white/20 backdrop-blur-md"
+      >
+        <h4 className="text-lg font-semibold mb-1">{param.name}</h4>
+        <p className="text-white/80 text-sm">{param.description}</p>
+      </div>
+    ))}
+  </div>
+</div>
       </section>
     </div>
   );
