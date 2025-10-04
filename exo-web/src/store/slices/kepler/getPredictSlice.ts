@@ -27,10 +27,26 @@ export const fetchPredictions = createAsyncThunk(
   'getPrediction/fetchPredictions',
   async ({ user_id, skip = 0, limit = 100 }: { user_id: number; skip?: number; limit?: number }, { rejectWithValue }) => {
     try {
+      console.log('Fetching Kepler predictions for user:', user_id, 'skip:', skip, 'limit:', limit);
+      
       const response = await api.get(`/predictions/?user_id=${user_id}&skip=${skip}&limit=${limit}`);
+      
+      console.log('Fetched predictions:', response.data);
       return response.data;
-    } catch (error: unknown) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch predictions');
+    } catch (error) {
+      console.error('Fetch predictions error:', error);
+      
+      if (error instanceof Error) {
+        const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
+        const errorMessage = axiosError.response?.data?.detail 
+          || axiosError.response?.data?.message 
+          || error.message 
+          || 'Failed to fetch predictions';
+        
+        return rejectWithValue(errorMessage);
+      }
+      
+      return rejectWithValue('Failed to fetch predictions');
     }
   }
 );
