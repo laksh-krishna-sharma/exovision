@@ -5,7 +5,13 @@ from passlib.context import CryptContext
 from app.config import settings
 
 # Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Using bcrypt_sha256 removes the 72-byte password limitation while keeping
+# bcrypt available for verifying any legacy hashes. New hashes will default to
+# bcrypt_sha256, and existing bcrypt hashes continue to validate successfully.
+pwd_context = CryptContext(
+    schemes=["bcrypt_sha256", "bcrypt"],
+    deprecated="auto",
+)
 
 
 # Utility: hash password
