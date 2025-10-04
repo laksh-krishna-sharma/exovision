@@ -43,7 +43,7 @@ const TessPage = () => {
 
         {/* Basic Parameters */}
         <div className="w-full">
-          <h2 className="text-4xl font-semibold mb-4">📡 Basic Parameters</h2>
+          <h2 className="text-4xl font-semibold mb-4"> Basic Parameters</h2>
           <div
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
