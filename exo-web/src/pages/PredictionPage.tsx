@@ -14,7 +14,8 @@ import type { RootState } from "@/store";
 import { useAppDispatch } from "@/store";
 import { defaultPrimaryParams, defaultExtraParams } from "@/staticValues/kepler_static_values";
 import SpaceBackground from "@/components/spacebackground";
-import { Button } from "@/components/ui/button";
+import Navbar from "@/components/Navbar";
+import { logout } from "@/store/slices/auth/loginSlice";
 
 const PredictionPage: React.FC = () => {
   const navigate = useNavigate();
@@ -162,21 +163,15 @@ const PredictionPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen text-slate-200 flex flex-col items-center p-6 overflow-hidden">
+      {/* Navbar */}
+      <Navbar logout={() => {
+        dispatch(logout());
+        navigate("/");
+      }} />
+
       {/* Space background */}
       <div className="absolute inset-0 -z-10">
         <SpaceBackground />
-      </div>
-
-      {/* Back button */}
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          onClick={() => navigate("/home")}
-          className="bg-transparent text-white border border-transparent 
-               hover:bg-white/10 hover:border-white/20 
-               hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] transition-all"
-        >
-          ← Back
-        </Button>
       </div>
 
       {/* Main Card with Popup Animation */}
@@ -186,7 +181,7 @@ const PredictionPage: React.FC = () => {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         className="w-full max-w-6xl flex flex-col items-center
                    bg-transparent border border-white/10 rounded-xl
-                   backdrop-blur-lg shadow-[0_0_20px_rgba(255,255,255,0.1)] p-6"
+                   backdrop-blur-lg shadow-[0_0_20px_rgba(255,255,255,0.1)] p-6 mt-16"
       >
         <ModelSelectButton selectedModel={selectedModel} onModelChange={setSelectedModel} />
         <ParametersCard

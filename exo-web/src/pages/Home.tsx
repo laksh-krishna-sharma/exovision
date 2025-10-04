@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store/index";
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/store/slices/auth/loginSlice";
-import Navbarfixed from "@/components/Navbarfixed";
+import Navbar from "@/components/Navbar";
 import SpaceBackground from "@/components/spacebackground";
 import { motion } from "framer-motion";
 
@@ -49,7 +49,7 @@ const HomePage = () => {
 
       {/* Navbar fixed at top */}
       <nav className="fixed top-0 left-0 w-full z-50 bg-transparent">
-        <Navbarfixed
+        <Navbar
           logout={() => {
             dispatch(logout());
             navigate("/");
