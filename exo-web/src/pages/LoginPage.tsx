@@ -6,7 +6,8 @@ import { useAppDispatch } from "@/store/index";
 import { login } from "@/store/slices/auth/loginSlice";
 import SpaceBackground from "@/components/spacebackground";
 import { motion } from "framer-motion";
-// import SpaceObjects from "@/components/spaceobject";
+import { toast }  from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -14,11 +15,32 @@ const LoginPage = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    if (!email || !password) return alert("Please enter email and password");
-    dispatch(login({ email, password }));
-    navigate("/home"); // Redirect to Home.tsx
+  const handleLogin = async () => {
+    if (!email || !password) {
+      return toast.error("Enter email and password");
+    }
+
+    try {
+      console.log('Attempting login...');
+      const result = await dispatch(login({ email, password }));
+
+      if (login.fulfilled.match(result)) {
+        console.log('Login successful:', result.payload);
+        toast.success("Login successful!");
+        navigate("/home");
+      } else {
+        console.error('Login failed:', result);
+        const errorMessage = typeof result.payload === 'string' 
+          ? result.payload 
+          : "Invalid email or password";
+        toast.error(errorMessage);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("Login failed. Please try again.");
+    }
   };
+
 
   // Card hover tilt logic
   const [cardRotate, setCardRotate] = useState({ x: 0, y: 0 });

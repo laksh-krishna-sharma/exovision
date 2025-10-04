@@ -6,6 +6,8 @@ scikit-learn
 # ---- Gradient boosting (fast baseline) ----
 xgboost
 shap
+imblearn
+lightgbm
 
 # ---- Deep learning (ANN) ----
 tensorflow[and-cuda]

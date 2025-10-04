@@ -32,7 +32,7 @@ const CameraAnimation = () => {
   return null;
 };
 
-const PlanetScene: FC = () => {
+const Emptyscene: FC = () => {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas
@@ -71,4 +71,4 @@ const PlanetScene: FC = () => {
   );
 };
 
-export default PlanetScene;
+export default Emptyscene;

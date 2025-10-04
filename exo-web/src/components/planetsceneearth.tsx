@@ -4,7 +4,7 @@ import { OrbitControls, Stars } from "@react-three/drei";
 import type { FC } from "react";
 import { Suspense, useRef } from "react";
 import * as THREE from "three";
-import PlanetModel from "./planetmodel";
+import PlanetModelearth from "./planetmodelearth";
 
 const CameraAnimation = () => {
   const { camera } = useThree();
@@ -32,7 +32,7 @@ const CameraAnimation = () => {
   return null;
 };
 
-const PlanetScene: FC = () => {
+const PlanetSceneearth: FC = () => {
   return (
     <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
       <Canvas
@@ -50,7 +50,7 @@ const PlanetScene: FC = () => {
           <CameraAnimation />
 
           {/* Planet */}
-          <PlanetModel scale={1.5} />
+          <PlanetModelearth scale={1.5} />
 
           {/* Stars */}
           <Stars
@@ -71,4 +71,4 @@ const PlanetScene: FC = () => {
   );
 };
 
-export default PlanetScene;
+export default PlanetSceneearth;

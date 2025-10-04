@@ -32,17 +32,35 @@ export const signup = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
+      console.log('Attempting signup for:', email);
+      
       // Send as JSON
       const response = await axios.post(
         `${baseURL}/auth/signup`,
         { name, email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
+      
+      console.log('Signup response:', response.data);
       return response.data;
     } catch (err: unknown) {
-      console.error("Signup error:", (err as AxiosError)?.response?.data);
-      console.error("Full error:", err);
-      return rejectWithValue((err as AxiosError)?.response?.data || (err as Error).message);
+      console.error("Signup error:", err);
+      console.error("Signup error response:", (err as AxiosError)?.response?.data);
+      
+      const errorData = (err as AxiosError)?.response?.data;
+      let errorMessage = 'Signup failed';
+      
+      if (errorData && typeof errorData === 'object') {
+        if ('detail' in errorData) {
+          errorMessage = (errorData as { detail: string }).detail;
+        } else if ('message' in errorData) {
+          errorMessage = (errorData as { message: string }).message;
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      
+      return rejectWithValue(errorMessage);
     }
   }
 );

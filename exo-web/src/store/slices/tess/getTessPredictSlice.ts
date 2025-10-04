@@ -1,61 +1,61 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api';
 
-interface PredictionRecord {
+interface TessPredictionRecord {
   prediction_id: string;
   prediction: string;
   confidence: number;
-  created_at: string;
+  timestamp: string;
   user_id?: number;
 }
 
-interface GetPredictState {
+interface GetTessPredictState {
   loading: boolean;
-  predictions: PredictionRecord[];
+  predictions: TessPredictionRecord[];
   total: number;
   error: string | null;
 }
 
-const initialState: GetPredictState = {
+const initialState: GetTessPredictState = {
   loading: false,
   predictions: [],
   total: 0,
   error: null,
 };
 
-export const fetchPredictions = createAsyncThunk(
-  'getPrediction/fetchPredictions',
+export const fetchTessPredictions = createAsyncThunk(
+  'getTessPrediction/fetchTessPredictions',
   async ({ user_id, skip = 0, limit = 100 }: { user_id: number; skip?: number; limit?: number }, { rejectWithValue }) => {
     try {
-      console.log('Fetching Kepler predictions for user:', user_id, 'skip:', skip, 'limit:', limit);
+      console.log('Fetching TESS predictions for user:', user_id, 'skip:', skip, 'limit:', limit);
       
-      const response = await api.get(`/predictions/?user_id=${user_id}&skip=${skip}&limit=${limit}`);
+      const response = await api.get(`/tess/predictions/?user_id=${user_id}&skip=${skip}&limit=${limit}`);
       
-      console.log('Fetched predictions:', response.data);
+      console.log('Fetched TESS predictions:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Fetch predictions error:', error);
+      console.error('Fetch TESS predictions error:', error);
       
       if (error instanceof Error) {
         const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
         const errorMessage = axiosError.response?.data?.detail 
           || axiosError.response?.data?.message 
           || error.message 
-          || 'Failed to fetch predictions';
+          || 'Failed to fetch TESS predictions';
         
         return rejectWithValue(errorMessage);
       }
       
-      return rejectWithValue('Failed to fetch predictions');
+      return rejectWithValue('Failed to fetch TESS predictions');
     }
   }
 );
 
-const getPredictSlice = createSlice({
-  name: 'getPrediction',
+const getTessPredictSlice = createSlice({
+  name: 'getTessPrediction',
   initialState,
   reducers: {
-    clearPredictions: (state) => {
+    clearTessPredictions: (state) => {
       state.predictions = [];
       state.total = 0;
       state.error = null;
@@ -63,21 +63,21 @@ const getPredictSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchPredictions.pending, (state) => {
+      .addCase(fetchTessPredictions.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchPredictions.fulfilled, (state, action) => {
+      .addCase(fetchTessPredictions.fulfilled, (state, action) => {
         state.loading = false;
         state.predictions = action.payload.predictions;
         state.total = action.payload.total;
       })
-      .addCase(fetchPredictions.rejected, (state, action) => {
+      .addCase(fetchTessPredictions.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
   },
 });
 
-export const { clearPredictions } = getPredictSlice.actions;
-export default getPredictSlice.reducer;
+export const { clearTessPredictions } = getTessPredictSlice.actions;
+export default getTessPredictSlice.reducer;

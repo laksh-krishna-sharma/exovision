@@ -7,6 +7,8 @@ import { signup } from "@/store/slices/auth/signupSlice";
 import { login } from "@/store/slices/auth/loginSlice";
 import SpaceBackground from "@/components/spacebackground";
 import { motion } from "framer-motion";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignupPage = () => {
   const [name, setName] = useState("");
@@ -18,23 +20,41 @@ const SignupPage = () => {
 
   const handleSignup = async () => {
     if (!name || !email || !password || !confirm) {
-      return alert("Please fill all fields");
+      return toast.error("Please fill all fields");
     }
     if (password !== confirm) {
-      return alert("Passwords do not match");
+      return toast.error("Passwords do not match");
     }
 
     try {
-      const result = await dispatch(signup({ name, email, password }));
-      if (signup.fulfilled.match(result)) {
-        await dispatch(login({ email, password }));
-        navigate("/home");
+      console.log('Starting signup process...');
+      const signupResult = await dispatch(signup({ name, email, password }));
+      
+      if (signup.fulfilled.match(signupResult)) {
+        console.log('Signup successful, attempting login...');
+        toast.success("Signup successful! Logging you in...");
+        
+        const loginResult = await dispatch(login({ email, password }));
+        
+        if (login.fulfilled.match(loginResult)) {
+          console.log('Login successful, navigating to home...');
+          toast.success("Welcome to Exovision!");
+          navigate("/home");
+        } else {
+          console.error('Login failed after signup:', loginResult);
+          toast.error("Signup successful but login failed. Please login manually.");
+          navigate("/login");
+        }
       } else {
-        alert((result.payload as string) || "Signup failed");
+        console.error('Signup failed:', signupResult);
+        const errorMessage = typeof signupResult.payload === 'string' 
+          ? signupResult.payload 
+          : "Signup failed. Please try again.";
+        toast.error(errorMessage);
       }
     } catch (err) {
-      console.error(err);
-      alert("Something went wrong");
+      console.error('Signup error:', err);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 

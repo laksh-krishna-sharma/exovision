@@ -6,6 +6,9 @@ import LoginPage from "@/pages/LoginPage"
 import SignupPage from "@/pages/SignupPage"
 import HomePage from "@/pages/Home"
 import PredictionPage from "@/pages/PredictionPage"
+import KeplerPage from "./pages/KeplerPage"
+import TessPage from "./pages/TessPage"
+import DocumentationPage from "./pages/DocumentationPage"
 
 function App() {
 
@@ -17,6 +20,9 @@ function App() {
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/prediction" element={<PredictionPage />} />
+        <Route path="/documentation" element={<DocumentationPage />} />
+        <Route path="/kepler" element={<KeplerPage/>}/>
+        <Route path="/tess" element={<TessPage/>}/>
       </Routes>
       <ToastContainer
         position="top-right"

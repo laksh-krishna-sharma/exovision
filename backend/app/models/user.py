@@ -5,6 +5,7 @@ from sqlmodel import SQLModel, Field, Relationship
 
 if TYPE_CHECKING:
     from app.models.prediction import PredictionRecord
+    from app.models.tess import TessPredictionRecord
 
 
 class User(SQLModel, table=True):
@@ -17,5 +18,8 @@ class User(SQLModel, table=True):
     updated_at: datetime = Field(default_factory=datetime.now, nullable=False)
 
     predictions: list["PredictionRecord"] = Relationship(
+        back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
+    )
+    tess_predictions: list["TessPredictionRecord"] = Relationship(
         back_populates="user", sa_relationship_kwargs={"cascade": "all, delete-orphan"}
     )

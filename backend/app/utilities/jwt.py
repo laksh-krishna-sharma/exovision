@@ -4,16 +4,13 @@ from jose import jwt
 from passlib.context import CryptContext
 from app.config import settings
 
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["pbkdf2_sha256"], deprecated="auto")
 
 
-# Utility: hash password
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
 
-# Utility: verify password
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 

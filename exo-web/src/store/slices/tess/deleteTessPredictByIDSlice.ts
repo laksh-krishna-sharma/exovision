@@ -1,67 +1,67 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../api';
 
-interface DeletePredictByIDState {
+interface DeleteTessPredictByIDState {
   loading: boolean;
   success: boolean;
   error: string | null;
 }
 
-const initialState: DeletePredictByIDState = {
+const initialState: DeleteTessPredictByIDState = {
   loading: false,
   success: false,
   error: null,
 };
 
-export const deletePredictionById = createAsyncThunk(
-  'deletePredictionById/deletePredictionById',
+export const deleteTessPredictionById = createAsyncThunk(
+  'deleteTessPredictionById/deleteTessPredictionById',
   async (predictionId: string, { rejectWithValue }) => {
     try {
-      console.log('Deleting Kepler prediction:', predictionId);
+      console.log('Deleting TESS prediction:', predictionId);
       
-      const response = await api.delete(`/predictions/${predictionId}`);
+      const response = await api.delete(`/tess/predictions/${predictionId}`);
       
-      console.log('Delete prediction response:', response.data);
+      console.log('Delete TESS prediction response:', response.data);
       return response.data;
     } catch (error) {
-      console.error('Delete prediction error:', error);
+      console.error('Delete TESS prediction error:', error);
       
       if (error instanceof Error) {
         const axiosError = error as { response?: { data?: { detail?: string; message?: string } } };
         const errorMessage = axiosError.response?.data?.detail 
           || axiosError.response?.data?.message 
           || error.message 
-          || 'Failed to delete prediction';
+          || 'Failed to delete TESS prediction';
         
         return rejectWithValue(errorMessage);
       }
       
-      return rejectWithValue('Failed to delete prediction');
+      return rejectWithValue('Failed to delete TESS prediction');
     }
   }
 );
 
-const deletePredictByIDSlice = createSlice({
-  name: 'deletePredictionById',
+const deleteTessPredictByIDSlice = createSlice({
+  name: 'deleteTessPredictionById',
   initialState,
   reducers: {
-    resetDeleteState: (state) => {
+    resetTessDeleteState: (state) => {
       state.success = false;
       state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(deletePredictionById.pending, (state) => {
+      .addCase(deleteTessPredictionById.pending, (state) => {
         state.loading = true;
         state.error = null;
         state.success = false;
       })
-      .addCase(deletePredictionById.fulfilled, (state) => {
+      .addCase(deleteTessPredictionById.fulfilled, (state) => {
         state.loading = false;
         state.success = true;
       })
-      .addCase(deletePredictionById.rejected, (state, action) => {
+      .addCase(deleteTessPredictionById.rejected, (state, action) => {
         state.loading = false;
         state.success = false;
         state.error = action.payload as string;
@@ -69,5 +69,5 @@ const deletePredictByIDSlice = createSlice({
   },
 });
 
-export const { resetDeleteState } = deletePredictByIDSlice.actions;
-export default deletePredictByIDSlice.reducer;
+export const { resetTessDeleteState } = deleteTessPredictByIDSlice.actions;
+export default deleteTessPredictByIDSlice.reducer;
