@@ -7,6 +7,7 @@ import SignupPage from "@/pages/SignupPage"
 import HomePage from "@/pages/Home"
 import PredictionPage from "@/pages/PredictionPage"
 import KeplerPage from "./pages/KeplerPage"
+import TessPage from "./pages/TessPage"
 
 function App() {
 
@@ -19,6 +20,7 @@ function App() {
         <Route path="/home" element={<HomePage />} />
         <Route path="/prediction" element={<PredictionPage />} />
         <Route path="/kepler" element={<KeplerPage/>}/>
+        <Route path="/tess" element={<TessPage/>}/>
       </Routes>
       <ToastContainer
         position="top-right"
