@@ -7,8 +7,8 @@ interface ModelSelectButtonProps {
 
 const ModelSelectButton: React.FC<ModelSelectButtonProps> = ({ selectedModel, onModelChange }) => {
   const models = [
-    { id: 'kepler_ann', name: 'Kepler' },
-    { id: 'xgb_full_train', name: 'K2 (Kepler extended mission)' },
+    { id: 'kepler_ann', name: 'K2 (Kepler extended mission)' },
+    
     { id: 'kepler_ann_savedmodel', name: 'TESS (Transiting Exoplanet Survey Satellite)' },
   ];
 
