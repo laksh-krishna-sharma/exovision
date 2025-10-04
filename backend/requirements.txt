@@ -16,4 +16,8 @@ gunicorn
 tensorflow
 numpy
 pandas
+scikit-learn
+xgboost
+imbalanced-learn
 types-requests
+joblib
