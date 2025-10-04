@@ -22,14 +22,23 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     log.info("Starting ExoVision API...")
     await init_models()
 
-    # Preload the prediction model
+    # Preload the K2 Keppler prediction model
     try:
         from app.services.prediction import prediction_service
 
         prediction_service.load_model()
-        log.info("Prediction model loaded successfully during startup")
+        log.info("K2 Keppler prediction model loaded successfully during startup")
     except Exception as e:
-        log.error(f"Failed to load prediction model during startup: {e}")
+        log.error(f"Failed to load K2 Keppler prediction model during startup: {e}")
+
+    # Preload the TESS prediction model
+    try:
+        from app.services.prediction import tess_prediction_service
+
+        tess_prediction_service.load_model()
+        log.info("TESS prediction model loaded successfully during startup")
+    except Exception as e:
+        log.error(f"Failed to load TESS prediction model during startup: {e}")
 
     log.info("Startup complete.")
 
