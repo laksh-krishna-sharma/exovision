@@ -1,7 +1,5 @@
-// import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-// import ExtrasDropdown from './ExtrasDropdown';
 import type { ParamTess } from './Types';
 
 interface ParametersCardProps {
