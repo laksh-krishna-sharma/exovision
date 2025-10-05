@@ -37,8 +37,8 @@ const ParametersCard: React.FC<ParametersCardProps> = ({
 
 
   return (
-    <div className="bg-black/30 backdrop-blur-md p-6 rounded-xl shadow-lg w-full max-w-4xl border border-white/10">
-      <h2 className="text-xl font-semibold text-white mb-6">Prediction Parameters</h2>
+    <div className="bg-black/30 backdrop-blur-md p-6 rounded-xl shadow-lg w-full border border-white/10">
+      <h2 className="text-4xl font-semibold text-white mb-6">Prediction Parameters</h2>
 
       {/* Primary Parameters with Input Boxes */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -46,7 +46,7 @@ const ParametersCard: React.FC<ParametersCardProps> = ({
           const sliderConfig = getSliderConfig(param.id);
           return (
             <div key={param.id} className="space-y-2">
-              <label htmlFor={param.id} className="block text-sm font-medium text-white/70">
+              <label htmlFor={param.id} className="block text-3xl font-medium text-white/70">
                 {param.label}
               </label>
               <div className="space-y-2">
@@ -68,9 +68,9 @@ const ParametersCard: React.FC<ParametersCardProps> = ({
                   min={sliderConfig.min}
                   max={sliderConfig.max}
                   step={sliderConfig.step}
-                  className="w-full bg-black/20 border-white/20 text-white placeholder-white/50"
+                  className="w-full bg-black/20 border-white/20 text-white placeholder-white/50 text-lg px-4 py-2 "
                 />
-                <div className="flex justify-between text-xs text-white/50">
+                <div className="flex justify-between text-lg text-white/50">
                   <span>Min: {sliderConfig.min}</span>
                   <span className="text-white font-medium">
                     Current: {typeof param.value === 'number' ? param.value.toFixed(1) : param.value}

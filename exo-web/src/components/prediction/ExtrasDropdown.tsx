@@ -20,7 +20,7 @@ const ExtrasDropdown: React.FC<ExtrasDropdownProps> = ({
       <Button
         onClick={onToggle}
         className="w-full mb-2 bg-black/10 text-white border border-white/20 
-             backdrop-blur-sm hover:bg-black/20 
+             backdrop-blur-lg hover:bg-black/20 
              hover:shadow-[0_0_30px_rgba(0,150,255,0.5)] 
              transition-shadow"
       >
@@ -32,7 +32,7 @@ const ExtrasDropdown: React.FC<ExtrasDropdownProps> = ({
             <div key={param.id} className="mb-3">
               <label
                 htmlFor={param.id}
-                className="block text-sm font-medium text-white/70 mb-1"
+                className="block text-xl font-medium text-white/70 mb-1"
               >
                 {param.label}
               </label>
