@@ -263,7 +263,7 @@ const PredictionPage: React.FC = () => {
   }));
 
   return (
-    <div className="relative min-h-screen text-slate-200 flex flex-col items-center p-6 overflow-hidden">
+    <div className="relative min-h-screen text-slate-200 flex flex-col items-center p-2 overflow-hidden">
       {/* Navbar */}
       <Navbar logout={() => {
         dispatch(logout());
@@ -280,19 +280,19 @@ const PredictionPage: React.FC = () => {
         initial={{ opacity: 0, scale: 0.85, y: 40 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-6xl flex flex-col items-center
+        className="w-full flex flex-col items-center
                    bg-transparent border border-white/10 rounded-xl
-                   backdrop-blur-lg shadow-[0_0_20px_rgba(255,255,255,0.1)] p-6 mt-16"
+                   backdrop-blur-lg shadow-[0_0_20px_rgba(255,255,255,0.1)] p-3 sm:p-4 mt-16"
       >
         {/* Inline Model Select Button */}
         <div className="mb-4 w-64">
-          <label htmlFor="model-select" className="block text-sm font-medium text-white/70 mb-2">
+          <label htmlFor="model-select" className="block text-4xl text-center font-medium text-white/70 mb-2">
             Select Model
           </label>
           <Select value={selectedModel} onValueChange={setSelectedModel}>
             <SelectTrigger
               id="model-select"
-              className="bg-black/30 backdrop-blur-md border border-white/10 text-white hover:border-white/20"
+              className="bg-black/30 backdrop-blur-md border border-white/10 text-white hover:border-white/20 text-lg"
             >
               <SelectValue placeholder="Choose a model" />
             </SelectTrigger>
