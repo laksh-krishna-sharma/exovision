@@ -1,12 +1,13 @@
 import os
 import json
 import uuid
-from typing import List, Optional, Any
+from typing import Any, List, Optional, cast
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
+from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from sqlalchemy import desc
 from app.models.user import User
 
 from joblib import load  # for sklearn models
@@ -88,7 +89,7 @@ class PredictionService:
                 raise
         return self.model
 
-    def preprocess_input(self, data: PredictionRequest) -> np.ndarray:
+    def preprocess_input(self, data: PredictionRequest) -> npt.NDArray[np.float32]:
         """Preprocess input for RF prediction"""
         input_dict = data.model_dump()
         df = pd.DataFrame([input_dict])
@@ -160,7 +161,7 @@ class PredictionService:
             query = (
                 query.offset(skip)
                 .limit(limit)
-                .order_by(desc(PredictionRecord.created_at))
+                .order_by(desc(cast(Any, PredictionRecord.created_at)))
             )
 
             result = await db.execute(query)

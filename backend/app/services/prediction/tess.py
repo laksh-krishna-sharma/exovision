@@ -1,12 +1,13 @@
 import os
 import json
 import uuid
-from typing import List, Optional, Any
+from typing import Any, List, Optional, cast
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
+from sqlalchemy import desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
-from sqlalchemy import desc
 from app.models.user import User
 
 import pickle  # for loading .pkl files
@@ -103,7 +104,7 @@ class TessPredictionService:
             log.error(f"Failed to load TESS XGBoost model: {str(e)}")
             raise
 
-    def preprocess_input(self, data: TessPredictionRequest) -> np.ndarray:
+    def preprocess_input(self, data: TessPredictionRequest) -> npt.NDArray[np.float32]:
         """Preprocess input for XGBoost prediction"""
         import numpy as np
 
@@ -208,7 +209,7 @@ class TessPredictionService:
             query = (
                 query.offset(skip)
                 .limit(limit)
-                .order_by(desc(TessPredictionRecord.created_at))
+                .order_by(desc(cast(Any, TessPredictionRecord.created_at)))
             )
 
             result = await db.execute(query)

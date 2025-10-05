@@ -30,10 +30,10 @@ const PredictionsTable: React.FC<PredictionsTableProps> = ({ predictions, onDele
               <tbody>
                 {predictions.map((row) => (
                   <tr key={row.id} className="border-b border-white/10 hover:bg-white/5 transition">
-                    <td className="text-2xl py-2 px-2">{row.name}</td>
-                    <td className="text-2xl py-2 px-2">{row.prediction}</td>
-                    <td className="text-2xl py-2 px-2">{row.confidence}%</td>
-                    <td className="text-2xl py-2 px-2">
+                    <td className="py-2 px-2">{row.name}</td>
+                    <td className="py-2 px-2">{(parseInt(row.prediction) === 1 ? "Planet found" : "Planet not found")}</td>
+                    <td className="py-2 px-2">{row.confidence}%</td>
+                    <td className="py-2 px-2">
                       <Button
                         onClick={() => onDelete(row.id)}
                         size="sm"
@@ -69,7 +69,7 @@ const PredictionsTable: React.FC<PredictionsTableProps> = ({ predictions, onDele
                 <div className="space-y-1 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/70">Prediction:</span>
-                    <span className="text-white">{row.prediction}</span>
+                    <span className="text-white">{row.prediction === "1" ? "found" : "not found"}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/70">Confidence:</span>
