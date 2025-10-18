@@ -1,19 +1,13 @@
 import 'package:flutter/foundation.dart';
-
-class User {
-  final String username;
-  final String email;
-
-  User({required this.username, required this.email});
-}
+import '../../domain/entities/user_entity.dart';
 
 class AuthProvider with ChangeNotifier {
-  User? _user;
+  UserEntity? _user;
   String? _accessToken;
   bool _isLoading = false;
   String? _error;
 
-  User? get user => _user;
+  UserEntity? get user => _user;
   String? get accessToken => _accessToken;
   bool get isAuthenticated => _accessToken != null;
   bool get isLoading => _isLoading;
@@ -38,9 +32,11 @@ class AuthProvider with ChangeNotifier {
       }
 
       _accessToken = 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}';
-      _user = User(
-        username: email.split('@').first,
+      _user = UserEntity(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: email.split('@').first,
         email: email,
+        createdAt: DateTime.now(),
       );
       
       _error = null;
@@ -73,7 +69,12 @@ class AuthProvider with ChangeNotifier {
       }
 
       _accessToken = 'mock_jwt_token_${DateTime.now().millisecondsSinceEpoch}';
-      _user = User(username: name, email: email);
+      _user = UserEntity(
+        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        name: name,
+        email: email,
+        createdAt: DateTime.now(),
+      );
       
       _error = null;
     } catch (e) {

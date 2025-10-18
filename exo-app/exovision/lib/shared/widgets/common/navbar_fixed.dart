@@ -7,15 +7,15 @@ import '../../../../app/theme/text_styles.dart';
 import '../../../features/auth/presentations/providers/auth_provider.dart';
 
 class NavbarFixed extends StatefulWidget {
-  final bool showBackButton;
-  final VoidCallback? onBackPressed;
   final String? title;
+  final bool showBackButton;
+  final VoidCallback? onBackTap;
 
   const NavbarFixed({
     super.key,
-    this.showBackButton = false,
-    this.onBackPressed,
     this.title,
+    this.showBackButton = false,
+    this.onBackTap,
   });
 
   @override
@@ -48,13 +48,8 @@ class _NavbarFixedState extends State<NavbarFixed> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Logo and Title
             _buildLogoSection(isMobile),
-            
-            // Navigation Items
             if (!isMobile) _buildDesktopNavigation(),
-            
-            // Mobile Menu Button
             if (isMobile) _buildMobileMenuButton(),
           ],
         ),
@@ -71,7 +66,6 @@ class _NavbarFixedState extends State<NavbarFixed> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // App Logo/Icon
             Container(
               width: isMobile ? 32 : 40,
               height: isMobile ? 32 : 40,
@@ -86,7 +80,6 @@ class _NavbarFixedState extends State<NavbarFixed> {
               ),
             ),
             const SizedBox(width: 12),
-            // App Name
             Text(
               'Exovision',
               style: isMobile
@@ -97,7 +90,7 @@ class _NavbarFixedState extends State<NavbarFixed> {
                       fontWeight: FontWeight.w700,
                     ),
             ),
-            if (widget.title != null) ...[
+            if (widget.title != null && widget.title!.isNotEmpty) ...[
               const SizedBox(width: 8),
               Text(
                 '•',
@@ -129,14 +122,10 @@ class _NavbarFixedState extends State<NavbarFixed> {
 
     return Row(
       children: [
-        // Navigation Links
         _buildNavItem('Home', '/home'),
         _buildNavItem('Prediction', '/prediction'),
         _buildNavItem('About', '/about'),
-        
         const SizedBox(width: 24),
-        
-        // Auth Section
         if (isAuthenticated) ...[
           _buildUserSection(authProvider),
           const SizedBox(width: 16),
@@ -162,12 +151,14 @@ class _NavbarFixedState extends State<NavbarFixed> {
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              color: isActive ? Colors.white.withOpacity(0.1) : Colors.transparent,
+              color:
+                  isActive ? Colors.white.withOpacity(0.1) : Colors.transparent,
             ),
             child: Text(
               text,
               style: TextStyles.bodyMedium.copyWith(
-                color: isActive ? AppColors.cyan : Colors.white.withOpacity(0.8),
+                color:
+                    isActive ? AppColors.cyan : Colors.white.withOpacity(0.8),
                 fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
               ),
             ),
@@ -187,11 +178,7 @@ class _NavbarFixedState extends State<NavbarFixed> {
             shape: BoxShape.circle,
             gradient: AppColors.buttonGradient,
           ),
-          child: Icon(
-            Icons.person,
-            color: Colors.white,
-            size: 18,
-          ),
+          child: const Icon(Icons.person, color: Colors.white, size: 18),
         ),
         const SizedBox(width: 8),
         Text(
@@ -223,11 +210,8 @@ class _NavbarFixedState extends State<NavbarFixed> {
           ),
           child: Row(
             children: [
-              Icon(
-                Icons.logout,
-                color: Colors.red.withOpacity(0.8),
-                size: 16,
-              ),
+              Icon(Icons.logout,
+                  color: Colors.red.withOpacity(0.8), size: 16),
               const SizedBox(width: 6),
               Text(
                 'Logout',
@@ -265,9 +249,7 @@ class _NavbarFixedState extends State<NavbarFixed> {
             color: isPrimary ? null : Colors.transparent,
             border: isPrimary
                 ? null
-                : Border.all(
-                    color: Colors.white.withOpacity(0.3),
-                  ),
+                : Border.all(color: Colors.white.withOpacity(0.3)),
           ),
           child: Text(
             text,
@@ -283,17 +265,11 @@ class _NavbarFixedState extends State<NavbarFixed> {
 
   Widget _buildMobileMenuButton() {
     return PopupMenuButton<String>(
-      icon: Icon(
-        Icons.menu,
-        color: Colors.white,
-        size: 24,
-      ),
+      icon: const Icon(Icons.menu, color: Colors.white, size: 24),
       color: AppColors.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: Colors.white.withOpacity(0.1),
-        ),
+        side: BorderSide(color: Colors.white.withOpacity(0.1)),
       ),
       onSelected: (value) {
         if (value == 'logout') {
@@ -336,9 +312,12 @@ class _NavbarFixedState extends State<NavbarFixed> {
                 children: [
                   Icon(Icons.logout, color: Colors.red.withOpacity(0.8)),
                   const SizedBox(width: 8),
-                  Text('Logout', style: TextStyles.bodyMedium.copyWith(
-                    color: Colors.red.withOpacity(0.8),
-                  )),
+                  Text(
+                    'Logout',
+                    style: TextStyles.bodyMedium.copyWith(
+                      color: Colors.red.withOpacity(0.8),
+                    ),
+                  ),
                 ],
               ),
             ),

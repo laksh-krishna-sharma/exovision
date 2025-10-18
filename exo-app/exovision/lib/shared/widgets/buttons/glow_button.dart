@@ -1,21 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import '../../../app/theme/colors.dart';
-import '../../../app/theme/text_styles.dart';
 
 class GlowButton extends StatefulWidget {
-  final VoidCallback onPressed;
   final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isEnabled;
   final bool isPrimary;
   final bool isMobile;
-  final bool isLoading;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double? width;
+  final double? height;
+  final EdgeInsetsGeometry? padding;
+  final Widget? icon;
 
   const GlowButton({
     super.key,
-    required this.onPressed,
     required this.text,
-    required this.isPrimary,
-    required this.isMobile,
+    this.onPressed,
     this.isLoading = false,
+    this.isEnabled = true,
+    this.isPrimary = true,
+    this.isMobile = false,
+    this.backgroundColor,
+    this.textColor,
+    this.width,
+    this.height,
+    this.padding,
+    this.icon,
   });
 
   @override
@@ -28,89 +42,101 @@ class _GlowButtonState extends State<GlowButton> {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = widget.isEnabled && !widget.isLoading;
+    
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
-      cursor: SystemMouseCursors.click,
       child: GestureDetector(
         onTapDown: (_) => setState(() => _isPressed = true),
         onTapUp: (_) => setState(() => _isPressed = false),
         onTapCancel: () => setState(() => _isPressed = false),
-        onTap: widget.onPressed,
-        child: Transform.scale(
-          scale: _isPressed ? 0.95 : 1.0,
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.symmetric(
-              horizontal: widget.isMobile ? 24 : 32,
-              vertical: widget.isMobile ? 14 : 16,
-            ),
-            decoration: BoxDecoration(
-              gradient: widget.isPrimary
-                  ? AppColors.buttonGradient
-                  : null,
-              color: widget.isPrimary
-                  ? null
-                  : Colors.transparent,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: widget.width,
+          height: widget.height ?? (widget.isMobile ? 48 : 56),
+          padding: widget.padding ?? EdgeInsets.symmetric(
+            horizontal: widget.isMobile ? 20 : 24, 
+            vertical: widget.isMobile ? 12 : 16
+          ),
+          decoration: BoxDecoration(
+            gradient: isEnabled && widget.isPrimary
+                ? LinearGradient(
+                    colors: [
+                      widget.backgroundColor ?? AppColors.cyan,
+                      (widget.backgroundColor ?? AppColors.cyan).withOpacity(0.8),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  )
+                : isEnabled && !widget.isPrimary
+                ? null
+                : LinearGradient(
+                    colors: [
+                      Colors.grey.withOpacity(0.3),
+                      Colors.grey.withOpacity(0.2),
+                    ],
+                  ),
+            color: !widget.isPrimary && isEnabled ? Colors.transparent : null,
+            border: !widget.isPrimary && isEnabled 
+                ? Border.all(color: AppColors.cyan.withOpacity(0.5), width: 1)
+                : null,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: isEnabled && (_isHovered || _isPressed) && widget.isPrimary
+                ? [
+                    BoxShadow(
+                      color: (widget.backgroundColor ?? AppColors.cyan).withOpacity(0.4),
+                      blurRadius: _isPressed ? 15 : 25,
+                      spreadRadius: _isPressed ? 1 : 3,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: isEnabled ? widget.onPressed : null,
               borderRadius: BorderRadius.circular(12),
-              border: widget.isPrimary
-                  ? null
-                  : Border.all(
-                      color: Colors.white.withOpacity(0.3),
-                      width: 1.5,
-                    ),
-              boxShadow: _isHovered && widget.isPrimary
-                  ? [
-                      BoxShadow(
-                        color: AppColors.cyan.withOpacity(0.6),
-                        blurRadius: 20,
-                        spreadRadius: 2,
-                      ),
-                      BoxShadow(
-                        color: AppColors.primary.withOpacity(0.4),
-                        blurRadius: 30,
-                        spreadRadius: 5,
-                      ),
-                    ]
-                  : widget.isPrimary
-                      ? [
-                          BoxShadow(
-                            color: AppColors.cyan.withOpacity(0.3),
-                            blurRadius: 10,
-                            spreadRadius: 1,
+              child: Container(
+                alignment: Alignment.center,
+                child: widget.isLoading
+                    ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            widget.textColor ?? Colors.white,
                           ),
-                        ]
-                      : null,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (widget.isLoading) ...[
-                  SizedBox(
-                    width: widget.isMobile ? 14 : 16,
-                    height: widget.isMobile ? 14 : 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  ),
-                  SizedBox(width: widget.isMobile ? 8 : 12),
-                ],
-                Text(
-                  widget.text,
-                  style: (widget.isMobile ? TextStyles.bodyLarge : TextStyles.titleMedium)
-                      .copyWith(
-                    color: widget.isPrimary
-                        ? Colors.white
-                        : Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (widget.icon != null) ...[
+                            widget.icon!,
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            widget.text,
+                            style: TextStyle(
+                              color: widget.textColor ?? Colors.white,
+                              fontSize: widget.isMobile ? 14 : 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ),
         ),
       ),
+    ).animate().fadeIn().scale(
+      begin: const Offset(0.95, 0.95),
+      end: const Offset(1.0, 1.0),
     );
   }
 }

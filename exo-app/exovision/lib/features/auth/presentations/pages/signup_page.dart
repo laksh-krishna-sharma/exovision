@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 import '../../../../app/theme/colors.dart';
@@ -8,7 +7,6 @@ import '../../../../app/theme/text_styles.dart';
 import '../../../../shared/widgets/common/space_background.dart';
 import '../../../../shared/widgets/inputs/glow_text_field.dart';
 import '../../../../shared/widgets/buttons/glow_button.dart';
-import '../providers/auth_provider.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({super.key});
@@ -24,6 +22,8 @@ class _SignupPageState extends State<SignupPage> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
+  bool _isLoading = false;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -36,7 +36,6 @@ class _SignupPageState extends State<SignupPage> {
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final authProvider = context.read<AuthProvider>();
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text;
@@ -47,14 +46,19 @@ class _SignupPageState extends State<SignupPage> {
       return;
     }
 
-    try {
-      await authProvider.signup(name, email, password);
-      if (authProvider.isAuthenticated) {
-        context.go('/home');
-      }
-    } catch (error) {
-      _showErrorDialog('Signup failed. Please try again.');
-    }
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulate API call
+    await Future.delayed(const Duration(seconds: 2));
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    // For demo purposes, just show success and go to home
+    _showSuccessDialog();
   }
 
   void _showErrorDialog(String message) {
@@ -83,6 +87,35 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
+  void _showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text(
+          'Success!',
+          style: TextStyles.titleMedium.copyWith(color: Colors.white),
+        ),
+        content: Text(
+          'Account created successfully!',
+          style: TextStyles.bodyMedium.copyWith(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              context.go('/home');
+            },
+            child: Text(
+              'Continue',
+              style: TextStyles.bodyMedium.copyWith(color: AppColors.cyan),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -97,21 +130,21 @@ class _SignupPageState extends State<SignupPage> {
 
           // Signup Content
           if (isMobile)
-            _buildMobileLayout()
+            _buildMobileLayout(context)
           else
-            _buildDesktopTabletLayout(isTablet, screenSize),
+            _buildDesktopTabletLayout(isTablet, screenSize, context),
         ],
       ),
     );
   }
 
-  Widget _buildMobileLayout() {
+  Widget _buildMobileLayout(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-          _buildSignupCard(true),
+          _buildSignupCard(true, context),
           SizedBox(height: 40),
           _buildExoplanetInfo(true),
         ],
@@ -119,7 +152,7 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildDesktopTabletLayout(bool isTablet, Size screenSize) {
+  Widget _buildDesktopTabletLayout(bool isTablet, Size screenSize, BuildContext context) {
     return Row(
       children: [
         // Left: Signup Card
@@ -128,8 +161,8 @@ class _SignupPageState extends State<SignupPage> {
             padding: EdgeInsets.all(isTablet ? 40 : 60),
             child: Center(
               child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 500),
-                child: _buildSignupCard(false),
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: _buildSignupCard(false, context),
               ),
             ),
           ),
@@ -146,9 +179,7 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildSignupCard(bool isMobile) {
-    final authProvider = context.watch<AuthProvider>();
-
+  Widget _buildSignupCard(bool isMobile, BuildContext context) {
     return Container(
       padding: EdgeInsets.all(isMobile ? 24 : 32),
       decoration: BoxDecoration(
@@ -206,8 +237,8 @@ class _SignupPageState extends State<SignupPage> {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
                 }
-                if (!value.contains('@')) {
-                  return 'Please enter a valid email';
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                  return 'Please enter a valid email address';
                 }
                 return null;
               },
@@ -252,7 +283,7 @@ class _SignupPageState extends State<SignupPage> {
             SizedBox(height: isMobile ? 24 : 32),
 
             // Signup Button
-            if (authProvider.isLoading)
+            if (_isLoading)
               _buildLoadingIndicator(isMobile)
             else
               _buildSignupButton(isMobile),
@@ -260,7 +291,7 @@ class _SignupPageState extends State<SignupPage> {
             SizedBox(height: isMobile ? 20 : 24),
 
             // Login Link
-            _buildLoginLink(isMobile),
+            _buildLoginLink(isMobile, context),
           ],
         ),
       ),
@@ -379,7 +410,7 @@ class _SignupPageState extends State<SignupPage> {
     );
   }
 
-  Widget _buildLoginLink(bool isMobile) {
+  Widget _buildLoginLink(bool isMobile, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -472,11 +503,18 @@ class _SignupPageState extends State<SignupPage> {
         if (hasImage)
           Container(
             margin: EdgeInsets.only(top: isMobile ? 16 : 20),
-            child: Image.asset(
-              'assets/images/exoplanet_types.png',
-              width: double.infinity,
-              height: isMobile ? 200 : 300,
-              fit: BoxFit.contain,
+            height: isMobile ? 200 : 300,
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.05),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.white.withOpacity(0.1)),
+            ),
+            child: Center(
+              child: Icon(
+                Icons.rocket_launch,
+                color: Colors.white.withOpacity(0.3),
+                size: isMobile ? 60 : 80,
+              ),
             ),
           ),
       ],
@@ -484,7 +522,7 @@ class _SignupPageState extends State<SignupPage> {
   }
 
   Widget _buildDetailedTypes(bool isMobile) {
-    final types = [
+    final List<Map<String, String>> types = [
       {
         'title': 'Gas Giants',
         'description': 'Planets the size of Saturn or Jupiter, or much larger. '

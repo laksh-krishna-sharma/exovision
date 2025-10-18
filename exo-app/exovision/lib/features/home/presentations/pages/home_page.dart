@@ -12,6 +12,7 @@ import '../widgets/hero_section.dart';
 import '../widgets/feature_card.dart';
 import '../widgets/section_widget.dart';
 
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
